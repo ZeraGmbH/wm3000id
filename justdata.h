@@ -5,7 +5,7 @@
 #define JUSTDATA_H
 
 #include <qdatastream.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 
 
 class cJustNode { // stützspunkt kann sich serialisieren und besteht aus stützwert (correction) und argument

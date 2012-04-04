@@ -1,4 +1,5 @@
 // implementierung crcutils
+#include "crcutils.h"
 
 char CalcByteCRC(char crc, char data) {
     crc = crc ^ data;
@@ -12,7 +13,7 @@ char CalcByteCRC(char crc, char data) {
 }
 
 
-char CalcBlockCRC(char* pBuff, int iBuffLen) {
+char CalcBlockCRC(quint8* pBuff, int iBuffLen) {
     char crc = 0;
     for (int i = 0; i < iBuffLen; i++)
 	crc = CalcByteCRC(crc, pBuff[i]);

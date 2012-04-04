@@ -8,7 +8,7 @@
 #include <iostream>
 #include <qstring.h>
 #include <qstringlist.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 
 
 #include "wmiglobal.h"
@@ -90,7 +90,7 @@ cZHClient::cZHClient(int s,struct sockaddr_in* adr) {
 cZHClient::~cZHClient() {
 }
 
-void cZHClient::SetOutput(char* s) {
+void cZHClient::SetOutput(const char* s) {
     sOutput=s;
 }
 
@@ -129,7 +129,7 @@ cZHServer::cZHServer() {
 
 
 cZHServer::cZHServer(cCmdInterpreter* ci) {
-    cZHServer::cZHServer();
+    cZHServer();
     pCmdInterpreter=ci;
 }
 
@@ -243,7 +243,7 @@ QString& cZHServer::GetSoftwareVersion() { // abfrage software version
     return (sSoftwareVersion);
 }
 
-int cZHServer::SetServerNr(char* s) {
+int cZHServer::SetServerNr(const char* s) {
     bool ok=true;
     int r=1; // erstmal falsch
     QString snr=s;

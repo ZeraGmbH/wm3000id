@@ -10,7 +10,7 @@
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qmap.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 #include <qdatetime.h>
 #include <qdom.h>
 
@@ -74,7 +74,7 @@ struct hw_cmd {
     const char* par;
     short plen;
     short cmdlen;
-    char* cmddata;
+    quint8* cmddata;
     short RM;
 };
 
@@ -89,7 +89,7 @@ struct bl_cmd {
     char* par;
     short plen;
     short cmdlen;
-    char* cmddata;
+    quint8* cmddata;
     short RM;
 };
 
@@ -98,7 +98,7 @@ enum enConfFlags { blAutoIncr = 1, blReadCommandsAvail = 2};
 
 struct blInfo {
     ushort ConfigurationFlags;
-    ushort MemPageSize;
+    int MemPageSize;
     uchar AdressPointerSize;
 };
 
@@ -107,19 +107,19 @@ void initLists();
 // enum {UnVisible = 1, UnSelectable = 2};
 
 struct sRange {
-	char* RName;		// Range  Name
-	char* RValue;		// Range Value 100%
-	char* RRejection;		// Range Rejection 100%
-	char  RSelCode;		// Range Selection Code (only for internal use)
-	char RType;		// Volt, Ampere.....
-	char RSpec;		// phsys, log, virt  
-	cWMJustData* pJustData; // Zeiger auf Justierdaten
+        const char* RName;		// Range  Name
+        const char* RValue;		// Range Value 100%
+        const char* RRejection;		// Range Rejection 100%
+        char  RSelCode;                 // Range Selection Code (only for internal use)
+        char RType;                     // Volt, Ampere.....
+        char RSpec;                     // phsys, log, virt
+        cWMJustData* pJustData;         // Zeiger auf Justierdaten
 };
 
 
 typedef QMap<QString,sRange*> tChannelRangeArrayMap; // zeigt für jeden kanal auf ein array v. sRange
 typedef QMap<QString,QStringList*> tChannelListMap; // zeigt für jeden kanal auf eine stringliste 
-typedef QValueList<int> tSockList;
+typedef Q3ValueList<int> tSockList;
 typedef QMap<QString,tSockList*> tChannelSockListMap;
  
 
@@ -232,7 +232,7 @@ private:
     
     void GenCommand(hw_cmd*); // generiert das kommando
     int I2CWriteCommand(hw_cmd*); // rückgabewert -1  wenn fehler sonst länge output
-    int I2CReadOutput(char*,int); // rückgabewert -1  wenn fehler sonst anzahl gelesener zeichen
+    int I2CReadOutput(quint8*,int); // rückgabewert -1  wenn fehler sonst anzahl gelesener zeichen
     
     void GenBootloaderCommand(bl_cmd*);
     int I2CBootloaderCommand(bl_cmd*);

@@ -2,20 +2,20 @@
 // cIntelHexFileIO: Class handling Intel Hex Files
 
 #include <qstring.h>
-#include <qmemarray.h>
-#include <qvaluelist.h>
+#include <q3memarray.h>
+#include <q3valuelist.h>
 
 struct THexFileMemRegion
 {
     // data
-    ulong nStartAddress;
+    int nStartAddress;
     QByteArray ByteArrContent;
     // methods
     THexFileMemRegion();
-    THexFileMemRegion( ulong StartAddress, const QByteArray& byteArray);
+    THexFileMemRegion( int StartAddress, const QByteArray& byteArray);
     THexFileMemRegion& operator = (const THexFileMemRegion& obj);
     bool operator == (const THexFileMemRegion& obj) const;
-    ulong GetMaxAddress();
+    int GetMaxAddress();
 };
 	
 
@@ -30,8 +30,8 @@ struct THexFileMessage
 };
 
 
-typedef QValueList<THexFileMemRegion> THexFileMemRegionList;
-typedef QValueList<THexFileMessage> THexFileMessageList;
+typedef Q3ValueList<THexFileMemRegion> THexFileMemRegionList;
+typedef Q3ValueList<THexFileMessage> THexFileMessageList;
 	
 	
 class cIntelHexFileIO
@@ -49,7 +49,7 @@ public:
     // the address is incremented to the next block found in steps of dwBlockLen to ensure to write one 
     // flash block only once. By adding dwStartAddressModuloBlockLen+dwOffsetToModulo the effective
     // start address of the memory block in byteArray is calculated.
-    void GetMemoryBlock(const ulong& nBlockLen, ulong& nStartAddressModuloBlockLen, QByteArray& byteArray, ulong& nOffsetToModulo);
+    void GetMemoryBlock(const int& nBlockLen, int& nStartAddressModuloBlockLen, QByteArray& byteArray, ulong& nOffsetToModulo);
 
     
 private:

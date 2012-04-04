@@ -4,7 +4,7 @@
 #define WMJUSTDATA_H
 
 #include <qdatastream.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 #include "justdata.h"
 
 

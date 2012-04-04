@@ -8,7 +8,7 @@
 #include <qstring.h>
 #include "i2cutils.h"
 #include "i2ceeprom.h"
-
+#include <QtGlobal>
 
 cI2CEEProm::cI2CEEProm(QString dn, int dl, short adr) {
     DevNode = dn;
@@ -23,8 +23,8 @@ c24LC256::c24LC256(QString dn, int dl, short adr)
 
 
 int c24LC256::WriteData(char* data,int n,int adr) {
-    char outpBuf[66]; // 2 adr byte, max 64 byte daten 
-    struct i2c_msg Msgs = {addr: I2CAdress, flags: I2C_M_RD, len: 5, buf: outpBuf }; // 1 message
+    quint8 outpBuf[66]; // 2 adr byte, max 64 byte daten
+    struct i2c_msg Msgs = {addr: I2CAdress, flags: I2C_M_RD, len: 5, buf:  outpBuf }; // 1 message
     struct i2c_rdwr_ioctl_data EEPromData = { msgs: &(Msgs), nmsgs: 1 };
     int toWrite=n;
     
@@ -52,8 +52,8 @@ int c24LC256::WriteData(char* data,int n,int adr) {
 
 
 int c24LC256::ReadData(char* data,int n,int adr) {
-    char outpBuf[2];    
-    char inpBuf[n];
+    quint8 outpBuf[2];
+    quint8 inpBuf[n];
     struct i2c_msg Msgs[2] = { {addr :I2CAdress, flags: 0,len: 2,buf: &(outpBuf[0])}, // 2 messages (tagged format )
 			  {addr :I2CAdress, flags: (I2C_M_RD+I2C_M_NOSTART), len: n, buf: &(inpBuf[0])} };    
      

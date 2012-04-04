@@ -3,6 +3,7 @@
 #include <syslog.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 #include "i2cutils.h"
 
 int I2CTransfer(QString devn,int i2cadr, int dl, i2c_rdwr_ioctl_data* iod) {

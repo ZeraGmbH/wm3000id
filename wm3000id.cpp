@@ -14,10 +14,12 @@
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qmap.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 #include <qfile.h>                                                                                   
 #include <qdom.h>
 #include <qbuffer.h>
+//Added by qt3to4:
+#include <QTextOStream>
 #include <unistd.h>
 #include "zeraglobal.h"
 #include "wmiglobal.h"
@@ -177,7 +179,7 @@ int cWM3000iServer::SetI2CMasterAdr(char* s) {
 
 int cWM3000iServer::I2CBootloaderCommand(bl_cmd* blc) {
     int rlen = -1; // rückgabewert länge ; < 0 bedeutet fehler
-    char inpBuf[5]; // die antwort auf command ist immer 5 bytes lang
+    quint8 inpBuf[5]; // die antwort auf command ist immer 5 bytes lang
   
     GenBootloaderCommand(blc);
     struct i2c_msg Msgs[2] = { {addr :I2CSlaveAdr, flags: 0,len: blc->cmdlen, buf: blc->cmddata}, // 2 messages (tagged format )
@@ -205,7 +207,7 @@ int cWM3000iServer::I2CBootloaderCommand(bl_cmd* blc) {
 
 int cWM3000iServer::I2CWriteCommand(hw_cmd* hc) {
     int rlen = -1; // rückgabewert länge ; < 0 bedeutet fehler
-    char inpBuf[5]; // die antwort auf command ist immer 5 bytes lang
+    quint8 inpBuf[5]; // die antwort auf command ist immer 5 bytes lang
   
     GenCommand(hc);
     struct i2c_msg Msgs[2] = { {addr :I2CSlaveAdr, flags: 0,len: hc->cmdlen, buf: hc->cmddata}, // 2 messages (tagged format )
@@ -231,7 +233,7 @@ int cWM3000iServer::I2CWriteCommand(hw_cmd* hc) {
  }
 
 
-int cWM3000iServer::I2CReadOutput(char* data, int dlen) { 
+int cWM3000iServer::I2CReadOutput(quint8* data, int dlen) {
     int rlen = -1; // rückgabewert länge ; < 0 bedeutet fehler
     
     struct i2c_msg Msgs = {addr :I2CSlaveAdr, flags: I2C_M_RD,len: dlen,buf: data}; // 1 message
@@ -252,7 +254,7 @@ int cWM3000iServer::I2CReadOutput(char* data, int dlen) {
 
 void  cWM3000iServer::GenCommand(hw_cmd* hc) {
     short len = 6 + hc->plen;
-    char* p = new char[len];
+    quint8* p = new quint8[len];
     hc->cmddata = p;
     
     *p++ = len >> 8;
@@ -272,7 +274,7 @@ void  cWM3000iServer::GenCommand(hw_cmd* hc) {
 
 void  cWM3000iServer::GenBootloaderCommand(bl_cmd* blc) {
     short len = 4 + blc->plen;
-    char* p = new char[len];
+    quint8* p = new quint8[len];
     blc->cmddata = p;
     
     *p++ = blc->cmdcode;
@@ -307,7 +309,7 @@ bool cWM3000iServer::ReadJustData() {
 	delete Flash;
 	return(false); // lesefehler
     }
-    QDataStream bastream( ba, IO_ReadOnly );
+    QDataStream bastream( &ba, QIODevice::ReadOnly );
     uint count;
     Q_UINT16 chksumCMP = 0;
     bastream >> count >> m_nChksumFlash; // länge der flashdaten u. checksumme 
@@ -327,12 +329,12 @@ bool cWM3000iServer::ReadJustData() {
     }
     
     QBuffer mem;
-    mem.setBuffer(ba2);
-    mem.open(IO_ReadWrite);
+    mem.setBuffer(&ba2);
+    mem.open(QIODevice::ReadWrite);
     mem.at(0);
     
     QByteArray ca(6); // qbyte array mit 6 bytes
-    QDataStream castream( ca, IO_WriteOnly );
+    QDataStream castream( &ca, QIODevice::WriteOnly );
     castream << count << chksumCMP;
     
     mem.writeBlock(ca); // 0 setzen der checksumme
@@ -346,7 +348,7 @@ bool cWM3000iServer::ReadJustData() {
     
      // jetzt die daten noch einsortieren
     QString SVersion;
-    QDataStream ba2stream( ba2, IO_ReadOnly );
+    QDataStream ba2stream( &ba2, QIODevice::ReadOnly );
     char flashdata[100];
     char* s = flashdata;
     ba2stream >> count >> chksumCMP;
@@ -445,6 +447,7 @@ bool cWM3000iServer::GetAdjInfo(QDomNode n) { // n steht auf einem element desse
     typedef QMap<QString,cWMJustData*> tRangeJustMap; // zur temporären speicherung von justagedaten
     tRangeJustMap RangeJustMap;
     tChannelListMap::Iterator it=NULL;
+    tChannelListMap::Iterator itNULL=NULL;
     QStringList* sl =NULL;
     QStringList::iterator it2;
     QString ch;
@@ -457,7 +460,7 @@ bool cWM3000iServer::GetAdjInfo(QDomNode n) { // n steht auf einem element desse
 	QDomElement e=n.toElement();
 	QString tName=e.tagName();
 	if (tName=="Name") {
-	    if (it!=NULL) return(false); // kanal name mehr als 1x ist ein fehler
+            if (it != itNULL) return(false); // kanal name mehr als 1x ist ein fehler
 	    ch=e.text();
 	    tChannelListMap::Iterator it=ChannelRangeListMap.find(ch);
 	    if (it==ChannelRangeListMap.end()) return(false); // den kanal gibt es nicht, auch ein fehler
@@ -642,7 +645,7 @@ const char* cWM3000iServer::mFile2Justdata(char* s) {
     }
     QString filename = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
     QFile file( filename+".xml" );
-    if ( !file.open( IO_ReadOnly ) ) {
+    if ( !file.open( QIODevice::ReadOnly ) ) {
 	if DEBUG1 syslog(LOG_ERR,"justdata import,xml file does not exist\n");
 	Answer = ERRPATHString; // falscher filename
 	return Answer.latin1();
@@ -840,8 +843,8 @@ const char* cWM3000iServer::mJustData2File(char* s) {
     filename+=".xml";
     
     QFile file(filename);
-    if ( file.open( IO_WriteOnly ) ) {
-	QTextStream stream( &file );
+    if ( file.open( QIODevice::WriteOnly ) ) {
+	Q3TextStream stream( &file );
 	stream << xml;
 	file.close();
 	Answer = ACKString;
@@ -878,7 +881,7 @@ const char* cWM3000iServer::mJustData2EEProm(char* s) {
     Q_UINT16 chksum=0;
     QByteArray ba;
 
-    QDataStream stream(ba,IO_ReadWrite);
+    QDataStream stream(&ba,QIODevice::ReadWrite);
     
     stream << count;
     stream << chksum; // checksumme
@@ -907,16 +910,16 @@ const char* cWM3000iServer::mJustData2EEProm(char* s) {
     count = ba.count(); // um die länge zu bestimmen
     QByteArray ca(6); // qbyte array mit 6 bytes
     
-    QDataStream castream( ca, IO_WriteOnly );
+    QDataStream castream( &ca, QIODevice::WriteOnly );
     castream << count << chksum;
 	
-    QBuffer mem(ba);
-    mem.open(IO_ReadWrite);
+    QBuffer mem(&ba);
+    mem.open(QIODevice::ReadWrite);
     mem.at(0); // qbuffer auf den anfang positionieren
     mem.writeBlock(ca); // überschreibt die länge + checksumme (noch 0)
 	
     chksum = qChecksum(ba.data(),ba.size()); // +crc-16
-    QDataStream castream2( ca, IO_WriteOnly );
+    QDataStream castream2( &ca, QIODevice::WriteOnly );
     castream2 << count << chksum;
 	
     mem.at(0); 
@@ -963,7 +966,7 @@ const char* cWM3000iServer::mGetPSamples() {
     struct hw_cmd CMD = { cmdcode: hwGetSRate, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
     Answer = ERREXECString;
     if ( ( I2CWriteCommand(&CMD) == 3) && (CMD.RM == 0)) {
-	char answ[3];
+        quint8 answ[3];
 	if (I2CReadOutput(answ,3) == 3) {
 	    short ps =0;
 	    for (int i = 0; i < 2; i++)
@@ -981,7 +984,7 @@ const char* cWM3000iServer::mGetSyncPeriod() {
     struct hw_cmd CMD = { cmdcode: hwGetPPSSync, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
     Answer = ERREXECString;
     if ( ( I2CWriteCommand(&CMD) == 5) && (CMD.RM == 0)) {
-	char answ[5];
+        quint8 answ[5];
 	if (I2CReadOutput(answ,5) == 5) {
 	    ulong PPSPar = 0;
 	    for (int i = 0; i < 4; i++)
@@ -1001,7 +1004,7 @@ const char* cWM3000iServer::mGetSyncSource() {
     struct hw_cmd CMD = { cmdcode: hwGetPPSSync, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
     Answer = ERREXECString;
     if ( ( I2CWriteCommand(&CMD) == 5) && (CMD.RM == 0)) {
-	char answ[5];
+        quint8 answ[5];
 	if (I2CReadOutput(answ,5) == 5) {
 	    ulong PPSPar = answ[0];
 	    PPSPar = (PPSPar >> 7) & 1;
@@ -1018,7 +1021,7 @@ const char* cWM3000iServer::mGetSampleMode() {
     struct hw_cmd CMD = { cmdcode: hwGetMode, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
     Answer = ERREXECString;
     if ( ( I2CWriteCommand(&CMD) == 2) && (CMD.RM == 0)) {
-	char answ[2];
+        quint8 answ[2];
 	if (I2CReadOutput(answ,2) == 2) {
 	    int pm = answ[0];
 	    Answer = QString::number(pm);
@@ -1033,7 +1036,7 @@ const char* cWM3000iServer::mGetSampleFrequency() {
     char PAR[1];
     struct hw_cmd CMD = { cmdcode: hwGetFrequency, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
     if ( ( I2CWriteCommand(&CMD) == 5) && (CMD.RM == 0)) {
-	char answ[5];
+        quint8 answ[5];
 	if (I2CReadOutput(answ,5) == 5) {
 	    ulong FPar = 0;
 	    for (int i = 0; i < 4;i++) 
@@ -1079,8 +1082,8 @@ const char* cWM3000iServer::mControlerMemUpdate(bl_cmdcode blwriteCmd,char* s)
 	    if ( (dlen > 5) && (blInfoCMD.RM == 0) ) // es müssen mindestens 6 zeichen sein
 	    { // 5 bytes rückmeldung und kein fehler
 		dlen++; // länge bezieht sich nur auf daten, wir wollen auch das crc-byte
-		char blInput[255];
-		int read = I2CReadOutput(blInput, dlen);
+                char blInput[255];
+                int read = I2CReadOutput((quint8*)blInput, dlen);
 		if ( read == dlen)
 		{ // wir haben die benötigten informationen vom bootloader
 		    blInfo BootloaderInfo;
@@ -1090,7 +1093,7 @@ const char* cWM3000iServer::mControlerMemUpdate(bl_cmdcode blwriteCmd,char* s)
 		    for (i = 0; i < 4; i++)
 			dest[i ^ 1] = blInput[pos+1+i]; // little endian ... big endian
 		    dest[i] = blInput[pos+1+i];
-		    ulong MemAdress = 0;
+                    int MemAdress = 0;
 		    ulong MemOffset;
 		    QByteArray MemByteArray;
 		    IntelHexData.GetMemoryBlock( BootloaderInfo.MemPageSize, MemAdress, MemByteArray, MemOffset);
@@ -1206,10 +1209,10 @@ const char* cWM3000iServer::mGetText(hw_cmdcode hwcmd) {
     int rlen;
     struct hw_cmd CMD = { cmdcode: hwcmd, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
     if ( ( (rlen = I2CWriteCommand(&CMD)) > 0) && (CMD.RM == 0)) {
-	char answ[rlen];
+        quint8 answ[rlen];
 	if (I2CReadOutput(answ,rlen) == rlen) {
 	    answ[rlen-1] = 0;
-	    Answer = answ;
+            Answer = (char*)answ;
 	    return Answer.latin1();
 	}
     }
@@ -1418,7 +1421,7 @@ bool cWM3000iServer::EEPromAccessEnable() {
     char PAR[1];
     struct hw_cmd CMD = { cmdcode: hwGetFlashWriteAccess, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
     if ( (I2CWriteCommand(&CMD) == 2) && (CMD.RM == 0)) {
-	char answ[2];
+        quint8 answ[2];
 	return ( (I2CReadOutput(answ,2) == 2) && (answ[0]) );
     }
     return(false);
@@ -1782,7 +1785,7 @@ const char* cWM3000iServer::mGetStatOVL() {
     char PAR[1];
     int rlen;
     struct hw_cmd CMD = { cmdcode: hwGetCritStat, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
-    char answ[3];
+    quint8 answ[3];
  
     if ( !( ( (rlen = I2CWriteCommand(&CMD)) == 3) && (CMD.RM == 0) && (I2CReadOutput(answ,rlen) == rlen)) ) {
 	Answer = ERREXECString; // error execution
@@ -1802,7 +1805,7 @@ const char* cWM3000iServer::mGetProtection() {
     char PAR[1];
     int rlen;
     struct hw_cmd CMD = { cmdcode: hwGetSenseProt, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
-    char answ[2];
+    quint8 answ[2];
  
     if ( !( ( (rlen = I2CWriteCommand(&CMD)) == 2) && (CMD.RM == 0) && (I2CReadOutput(answ,rlen) == rlen)) ) {
 	Answer = ERREXECString; // error execution
@@ -1810,7 +1813,7 @@ const char* cWM3000iServer::mGetProtection() {
     }   
     else
     {	
-	uchar prot;
+        quint8 prot;
 	prot = answ[0];
 	Answer = QString("%1").arg(prot & 1);
     }
@@ -1835,7 +1838,7 @@ const char* cWM3000iServer::mGetRange() {
     char PAR[1];
     int rlen;
     struct hw_cmd CMD = { cmdcode: hwGetRange, device: dnr, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
-    char answ[2];
+    quint8 answ[2];
     
     if ( !( ( (rlen = I2CWriteCommand(&CMD)) == 2) && (CMD.RM == 0) && (I2CReadOutput(answ,rlen) == rlen)) ) {
 	Answer = ERREXECString; // error execution
