@@ -34,7 +34,7 @@ bool THexFileMemRegion::operator == (const THexFileMemRegion& obj) const
 }
 
 
-int THexFileMemRegion::GetMaxAddress()
+quint32 THexFileMemRegion::GetMaxAddress()
 {
 	return nStartAddress + ByteArrContent.size() - 1;
 }
@@ -104,14 +104,14 @@ bool cIntelHexFileIO::ReadHexFile(const QString& fileName)
 	bool bUpperHexDigit = true;
 	bool bLastReceived = false;
 	ulong nByteRead = 0;
-        int nCurrDataPos = 0;
+        quint32 nCurrDataPos = 0;
 
 	// for all subsequent records
 	ulong nAddressExtension = 0;
 
 	// Per record
-        int nCurrDataLen = 0;
-        int nCurrAddress = 0;
+        quint32 nCurrDataLen = 0;
+        quint32 nCurrAddress = 0;
         enRecordType enCurrRecordType = RECTYPE_UNDEF;
 	uchar byteCheckSum = 0;
 	uchar DataBuff[256];
@@ -248,7 +248,7 @@ bool cIntelHexFileIO::ReadHexFile(const QString& fileName)
 					       {
 						   QByteArray byteArray;
 						   byteArray.resize(nCurrDataLen);
-                                                   for (int ByteNo = 0; ByteNo < nCurrDataLen; ByteNo++)
+                                                   for (quint32 ByteNo = 0; ByteNo < nCurrDataLen; ByteNo++)
 						       byteArray[ByteNo] = DataBuff[ByteNo];
 						   m_ListMemRegions.append(THexFileMemRegion(nAddressExtension+nCurrAddress, byteArray));
 						   break;
@@ -331,13 +331,13 @@ bool cIntelHexFileIO::ReadHexFile(const QString& fileName)
     return !readHexError;
 }
 
-void cIntelHexFileIO::GetMemoryBlock(const int& nBlockLen, int& nStartAddressModuloBlockLen, QByteArray& byteArray, ulong& nOffsetToModulo)
+void cIntelHexFileIO::GetMemoryBlock(const quint32& nBlockLen, quint32& nStartAddressModuloBlockLen, QByteArray& byteArray, quint32& nOffsetToModulo)
 {
-        int nMaxAdress = nStartAddressModuloBlockLen + nBlockLen - 1;
+        quint32 nMaxAdress = nStartAddressModuloBlockLen + nBlockLen - 1;
 	
 	THexFileMemRegionList::iterator posNext;
 	// Search regions affected
-	THexFileMemRegionList AffectedMemRegions;
+        THexFileMemRegionList AffectedMemRegions;
 	//CList<POSITION, POSITION&> AffectedMemRegionPositions;
 	for (posNext = m_ListMemRegions.begin(); posNext != m_ListMemRegions.end(); ++posNext)
 	{
@@ -396,11 +396,11 @@ void cIntelHexFileIO::GetMemoryBlock(const int& nBlockLen, int& nStartAddressMod
 	{
 	    // At first we need to check for the memory range of the affected regions
 	    // Init conditions so that the first will change the ranges
-            int nRangeMinAddress = 0x7fffffff;
-            int nRangeMaxAddress = 0;
+            quint32 nRangeMinAddress = 0x7fffffff;
+            quint32 nRangeMaxAddress = 0;
             int i;
 	    for ( i = 0; i < AffectedMemRegions.count(); i++)
-	    {
+            {
 		THexFileMemRegion CurrEntry = AffectedMemRegions[i];
 		if(CurrEntry.nStartAddress < nRangeMinAddress)
 		    nRangeMinAddress = CurrEntry.nStartAddress;
@@ -434,7 +434,7 @@ void cIntelHexFileIO::GetMemoryBlock(const int& nBlockLen, int& nStartAddressMod
 		//     |  desired  |        | desired |
 		else
 		    nFirstAddress = CurrEntry.nStartAddress;
-                for(int nCurrAddress = nFirstAddress; nCurrAddress <= CurrEntry.GetMaxAddress() && nCurrAddress <= nMaxAdress; nCurrAddress++)
+                for(quint32 nCurrAddress = nFirstAddress; nCurrAddress <= CurrEntry.GetMaxAddress() && nCurrAddress <= nMaxAdress; nCurrAddress++)
 		{
 		    byteArray[nCurrAddress - nStartAddressModuloBlockLen] = CurrEntry.ByteArrContent[nCurrAddress-CurrEntry.nStartAddress];				
 		}

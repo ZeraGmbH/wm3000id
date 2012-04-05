@@ -98,7 +98,7 @@ enum enConfFlags { blAutoIncr = 1, blReadCommandsAvail = 2};
 
 struct blInfo {
     ushort ConfigurationFlags;
-    int MemPageSize;
+    quint32 MemPageSize;
     uchar AdressPointerSize;
 };
 

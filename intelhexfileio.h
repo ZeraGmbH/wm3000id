@@ -8,14 +8,14 @@
 struct THexFileMemRegion
 {
     // data
-    int nStartAddress;
+    quint32 nStartAddress;
     QByteArray ByteArrContent;
     // methods
     THexFileMemRegion();
     THexFileMemRegion( int StartAddress, const QByteArray& byteArray);
     THexFileMemRegion& operator = (const THexFileMemRegion& obj);
     bool operator == (const THexFileMemRegion& obj) const;
-    int GetMaxAddress();
+    quint32 GetMaxAddress();
 };
 	
 
@@ -49,7 +49,7 @@ public:
     // the address is incremented to the next block found in steps of dwBlockLen to ensure to write one 
     // flash block only once. By adding dwStartAddressModuloBlockLen+dwOffsetToModulo the effective
     // start address of the memory block in byteArray is calculated.
-    void GetMemoryBlock(const int& nBlockLen, int& nStartAddressModuloBlockLen, QByteArray& byteArray, ulong& nOffsetToModulo);
+    void GetMemoryBlock(const quint32& nBlockLen, quint32& nStartAddressModuloBlockLen, QByteArray& byteArray, quint32& nOffsetToModulo);
 
     
 private:
