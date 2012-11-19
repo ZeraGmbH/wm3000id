@@ -34,13 +34,9 @@ SOURCES	+= cmdinterpret.cpp \
 	wmjustdata.cpp \
 	zhserver.cpp
 
-unix {
-  UI_DIR = .ui
-  MOC_DIR = .moc
-  OBJECTS_DIR = .obj
-}
-
-
-
+# Input
 #The following line was inserted by qt3to4
 QT += xml  qt3support 
+
+target.path = /usr/bin
+INSTALLS += target
