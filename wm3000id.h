@@ -20,7 +20,7 @@
 #include "wmscpi.h"
 
 // alles default werte, können beim start überschrieben werden
-#define I2CDeviceNode "/dev/i2c/0"
+#define I2CDeviceNode "/dev/i2c-3"
 #define I2CMasterAdress 0x20
 #define I2CSlaveAdress 0x21
 
