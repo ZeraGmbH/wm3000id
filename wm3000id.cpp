@@ -597,6 +597,27 @@ const char* cWM3000iServer::mSetPSamples(char* s) {
 }	
  
 
+
+const char *cWM3000iServer::mSetSenseAbsDiff(char * s)
+{
+    bool ok;
+    QString par = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
+    int sad = par.toInt(&ok);
+
+    if ( (ok) && (sad > -1) && (sad< 2) ) {
+    char PAR[1];
+    PAR[0] = sad;
+    hw_cmd CMD = { cmdcode: hwSetSenseAbsDiff, device: 0, par: PAR, plen: 1,cmdlen: 0,cmddata: 0, RM:0 };
+    if ((I2CWriteCommand(&CMD) == 0) &&  (CMD.RM == 0))
+        Answer = ACKString; // acknowledge
+    else
+        Answer = ERREXECString;
+    }
+    else Answer = ERRVALString;
+    return Answer.latin1();
+}
+
+
 const char* cWM3000iServer::mSetSampleMode(char* s) {
     bool ok;
     QString par = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
@@ -1205,18 +1226,18 @@ const char* cWM3000iServer::mControlerStartProgram(char* s)
 
 
 const char* cWM3000iServer::mGetText(hw_cmdcode hwcmd) {
-    char PAR[1];
-    int rlen;
-    struct hw_cmd CMD = { cmdcode: hwcmd, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
-    if ( ( (rlen = I2CWriteCommand(&CMD)) > 0) && (CMD.RM == 0)) {
-        quint8 answ[rlen];
-	if (I2CReadOutput(answ,rlen) == rlen) {
-	    answ[rlen-1] = 0;
-            Answer = (char*)answ;
-	    return Answer.latin1();
-	}
-    }
-    return("Unknown");    
+        char PAR[1];
+        int rlen;
+        struct hw_cmd CMD = { cmdcode: hwcmd, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
+                              if ( ( (rlen = I2CWriteCommand(&CMD)) > 0) && (CMD.RM == 0)) {
+                quint8 answ[rlen];
+                if (I2CReadOutput(answ,rlen) == rlen) {
+                    answ[rlen-1] = 0;
+                    Answer = (char*)answ;
+                    return Answer.latin1();
+                }
+            }
+                              return("Unknown");
 }
 
 
@@ -2094,6 +2115,7 @@ const char* cWM3000iServer::SCPICmd( SCPICmdType cmd, char* s) {
     switch ((int)cmd)	{
 	
     case   SetPSamples:		return mSetPSamples(s);	
+    case    SetSenseAbsDiff: return mSetSenseAbsDiff(s);
     case 	SetSampleMode:		return mSetSampleMode(s);
     case   SetSampleFrequency:	return mSetSampleFrequency(s);
     case 	SetSerialNumber: 		return mSetSerialNumber(s);

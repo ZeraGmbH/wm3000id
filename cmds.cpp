@@ -66,6 +66,10 @@ cNodeSCPI* System;
 	                        cNodeSCPI* SystemSamplingFrequency; 
 		          cNodeSCPI* SystemSamplingMode;		
 		          cNodeSCPI* SystemSamplingPSamples;
+
+         cNodeSCPI* SystemSense;
+                    cNodeSCPI* SystemSenseMode;
+
                    cNodeSCPI* SystemSynchronisation;
 	                        cNodeSCPI* SystemSynchronisationSource; 
 		          cNodeSCPI* SystemSynchronisationPeriod;
@@ -103,10 +107,12 @@ cNode* InitCmdTree() {
     MMemory=new cNodeSCPI("MMEMORY",isNode,NULL,MMemoryRead,nixCmd,nixCmd);	     
     
     // implementiertes system modell
-    
+    SystemSenseMode=new cNodeSCPI("MODE",isCommand,NULL,NULL,SetSenseAbsDiff,nixCmd);
+    SystemSense=new cNodeSCPI("SENSE",isNode,NULL,SystemSenseMode,nixCmd,nixCmd);
+
     SystemSynchronisationPeriod=new cNodeSCPI("PERIOD",isQuery | isCommand,NULL,NULL,SetSyncPeriod,GetSyncPeriod);
     SystemSynchronisationSource=new cNodeSCPI("SOURCE",isQuery | isCommand,SystemSynchronisationPeriod,NULL,SetSyncSource,GetSyncSource);
-    SystemSynchronisation=new cNodeSCPI("SYNCHRONISATION",isNode,NULL,SystemSynchronisationSource,nixCmd,nixCmd);
+    SystemSynchronisation=new cNodeSCPI("SYNCHRONISATION",isNode,SystemSense,SystemSynchronisationSource,nixCmd,nixCmd);
     SystemSamplingPSamples=new cNodeSCPI("PSAMPLES",isQuery | isCommand,NULL,NULL,SetPSamples,GetPSamples);
     SystemSamplingMode=new cNodeSCPI("MODE",isQuery | isCommand,SystemSamplingPSamples,NULL,SetSampleMode,GetSampleMode);
     SystemSamplingFrequency=new cNodeSCPI("FREQUENCY",isQuery | isCommand,SystemSamplingMode,NULL,SetSampleFrequency,GetSampleFrequency);

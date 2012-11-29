@@ -7,8 +7,10 @@ enum SCPICmdType  {	nixCmd, // 0 is nix
 			
 			// die routinen für das system modell
     
-                                          SetSyncPeriod,
-                                          GetSyncPeriod,
+            SetSenseAbsDiff,
+
+            SetSyncPeriod,
+            GetSyncPeriod,
 			SetSyncSource,
 			GetSyncSource,
 			SetPSamples,

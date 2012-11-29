@@ -63,7 +63,8 @@ enum hw_cmdcode {	hwGetSerialNr = 0x0001,	hwGetDevName = 0x0002,
 			hwGetPCBTemp = 0x100A,	hwGetFlashWriteAccess=0x100B,
 			hwSetPPSSync = 0x100C,	hwGetPPSSync = 0x100D,
 			hwSetSenseProt = 0x100E,  hwGetSenseProt = 0x100F,
-			
+            hwSetSenseAbsDiff = 0x1010,  hwGetSenseAbsDiff = 0x1011,
+
 			hwSetRange = 0x1100,	hwGetRange = 0x1101};
 
 			
@@ -155,7 +156,8 @@ private:
     
     const char* mSetPPSSync(); // indirekt fürs system modell 
     const char* mGetText(hw_cmdcode); // dito
-    
+
+    const char* mSetSenseAbsDiff(char*);
     const char* mSetSyncPeriod(char*);
     const char* mGetSyncPeriod();
     const char* mSetSyncSource(char*);

@@ -7,7 +7,8 @@
 // V1.02 14.02.12
 // es gibt jetzt detailiertere fehlermeldungen wenn im xml justage import file fehler auftreten auf der schnittstelle
 // beim lesen der justagedaten aus dem flash werden auf der hinteren stelle der versionsnummern für lca und ctrl änderungen zugelassen ohne dass es zu einer meldung nicht justiert oder so führt.
-
+// V1.03 29.11.12
+// kommando zur umschaltung absolut / differenzmessung eingebaut
 
 #ifndef WMGOBAL_H
 #define WMGLOBAL_H
@@ -15,7 +16,7 @@
 #define CheckSumOffset 56
 #define LeiterkartenName "wm3000i"
 #define ServerBasisName "wm3000id"
-#define ServerVersion "V1.02"
+#define ServerVersion "V1.03"
 #define InpBufSize 4096
 
 // wenn WMDEBUG -> kein fork() 
