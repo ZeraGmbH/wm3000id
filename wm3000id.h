@@ -224,6 +224,8 @@ private:
     
     bool Test4HWPresent();
     bool EEPromAccessEnable();
+    bool isAtmelRunning();
+    void wait4AtmelRunning();
     void AddChannelClient(QString&); // fügt hinzu/löscht einen client der open/close
     void DelChannelClient(QString&); //  auf einem kanal durchgeführt hat ( parameter ist der kanal) 
     
@@ -267,6 +269,8 @@ private:
     QString sDeviceVersion; // version der hardware
     QDateTime DateTime; // datum,uhrzeit
     
+    QString m_sFPGADeviceNode; // für den zugriff zur hardware (fpga register)
+
     QString Answer;
     int m_nJDataStat;
     double SampleFrequency;

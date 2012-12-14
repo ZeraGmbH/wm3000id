@@ -130,6 +130,10 @@ cWM3000iServer::cWM3000iServer()
     I2CMasterAdr = I2CMasterAdress; //default 0x20
     I2CSlaveAdr = I2CSlaveAdress; // default  0x21
     DateTime = QDateTime(QDate(8000,12,24));
+
+    m_sFPGADeviceNode = FPGADeviceNode;
+    wait4AtmelRunning();
+
     sSerialNumber = mGetSerialNumber();
     sDeviceVersion = mGetDeviceVersion();
     ReadJustData();
@@ -1445,7 +1449,61 @@ bool cWM3000iServer::EEPromAccessEnable() {
         quint8 answ[2];
 	return ( (I2CReadOutput(answ,2) == 2) && (answ[0]) );
     }
-    return(false);
+                          return(false);
+                        }
+
+
+bool cWM3000iServer::isAtmelRunning()
+{
+        int fd;
+        if ( (fd = open(m_sFPGADeviceNode.latin1(),O_RDWR)) < 0 )
+        {
+            if (DEBUG1)  syslog(LOG_ERR,"error opening fpga device: %s\n",m_sFPGADeviceNode.latin1());
+            return false;
+        }
+
+        else
+        {
+            ulong pcbTestReg;
+            int r;
+            if ( (r = lseek(fd,0xffc,0)) < 0 )
+            {
+                if  (DEBUG1)  syslog(LOG_ERR,"error positioning fpga device: %s\n",m_sFPGADeviceNode.latin1());
+                close(fd);
+                return false;
+            }
+            else
+            {
+                r = read(fd,(char*) &pcbTestReg,4);
+                close(fd);
+                if (DEBUG1)  syslog(LOG_ERR,"reading fpga adr 0xffc =  %d\n", pcbTestReg);
+                if (r < 0 )
+                {
+                    if (DEBUG1)  syslog(LOG_ERR,"error reading fpga device: %s\n",m_sFPGADeviceNode.latin1());
+                    return false;
+                }
+                else
+                    return ((pcbTestReg & 1) > 0);
+            }
+        }
+}
+
+
+void cWM3000iServer::wait4AtmelRunning()
+{
+    int i;
+
+    for (i=0; i<100; i++)
+    {
+        if (isAtmelRunning())
+            break;
+        usleep(100000);
+    }
+
+    if (DEBUG1)
+        if (i==100)
+            syslog(LOG_ERR,"atmel not running\n");
+
 }
 
 
