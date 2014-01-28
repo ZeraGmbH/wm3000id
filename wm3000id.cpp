@@ -2123,7 +2123,7 @@ int cWM3000iServer::Execute() { // server ausführen
 				    if (InputBuffer[nBytes-1] == 0x0d) InputBuffer[--nBytes]=0;
 				InpRdy=true;
 				break;
-		                  case 0x04: // eof
+                case 0x04: // eof
 				InputBuffer[nBytes-1]=0; // c string ende daraus machen 
 				InpRdy=true;
 				break;
