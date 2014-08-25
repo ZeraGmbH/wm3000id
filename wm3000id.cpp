@@ -397,7 +397,8 @@ bool cWM3000iServer::ReadJustData() {
 	qs.replace(qs.section(';',3,3), ss); // CTRL: x.yy -> s
 	
 	if (qs != sDeviceVersion) {
-	    if DEBUG1 syslog(LOG_ERR,"flashmemory read, contains wrong versionnumber\n");
+        syslog(LOG_ERR,"flashmemory read, contains wrong versionnumber\n");
+        syslog(LOG_ERR,"read: |%s|, expected: |%s|\n", s, sDeviceVersion.latin1());
 	    m_nJDataStat += wrongVERS;
 	    if (!EEPromAccessEnable()) return false; // versionsnummer falsch
 	}
@@ -405,9 +406,10 @@ bool cWM3000iServer::ReadJustData() {
     
     ba2stream >> s;
     if (QString(s) != sSerialNumber) {
-	if DEBUG1 syslog(LOG_ERR,"flashmemory read, contains wrong serialnumber\n");
-	m_nJDataStat += wrongSNR;
-	if (!EEPromAccessEnable()) return false; // seriennummer falsch
+        syslog(LOG_ERR,"flashmemory read, contains wrong serialnumber\n");
+        syslog(LOG_ERR,"read: |%s|, expected: |%s|\n", s, sSerialNumber.latin1());
+        m_nJDataStat += wrongSNR;
+        if (!EEPromAccessEnable()) return false; // seriennummer falsch
     }
     
     ba2stream >> s;
