@@ -51,7 +51,7 @@ int main( int argc, char *argv[] )
        }
 	
        if (pid==0) { // wenn es der kindprozess ist
-	   syslog(LOG_INFO,"wm3000ud server child process created\n");
+       syslog(LOG_INFO,"wm3000id server child process created\n");
            r = chdir ("/"); // bekommt er einen platz zum "leben"
 	   setsid();
 	   close (STDIN_FILENO); // löst sich von der konsole
@@ -61,7 +61,7 @@ int main( int argc, char *argv[] )
            r = dup (STDIN_FILENO);
            r = dup (STDOUT_FILENO);
 	   r=wm3000d->Execute(); // und läuft von nun an eigenständig
-	   syslog(LOG_INFO,"wm3000ud server child process terminated\n");		  
+       syslog(LOG_INFO,"wm3000id server child process terminated\n");
        }
 #else
        r=wm3000d->Execute(); // wenn DEBUG -> kein fork -> server läuft im vordergrund 
