@@ -225,7 +225,8 @@ private:
     bool Test4HWPresent();
     bool EEPromAccessEnable();
     bool isAtmelRunning();
-    void wait4AtmelRunning();
+    bool wait4AtmelRunning();
+    bool programAtmelFlash();
     void AddChannelClient(QString&); // fügt hinzu/löscht einen client der open/close
     void DelChannelClient(QString&); //  auf einem kanal durchgeführt hat ( parameter ist der kanal) 
     
