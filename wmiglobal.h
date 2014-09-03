@@ -25,6 +25,7 @@
 #define ServerBasisName "wm3000id"
 #define ServerVersion "V2.04"
 #define InpBufSize 4096
+#define atmelFlashfilePath "/opt/zera/bin/atmel.eep"
 
 // wenn WMDEBUG -> kein fork() 
 //#define WMDEBUG 1
