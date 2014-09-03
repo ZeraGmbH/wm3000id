@@ -132,7 +132,15 @@ cWM3000iServer::cWM3000iServer()
     DateTime = QDateTime(QDate(8000,12,24));
 
     m_sFPGADeviceNode = FPGADeviceNode;
-    wait4AtmelRunning();
+
+    QFile atmelFile(atmelFlashfilePath);
+    if (atmelFile.exists())
+    {
+        if (programAtmelFlash() && wait4AtmelRunning())
+            atmelFile.remove();
+    }
+    else
+        wait4AtmelRunning();
 
     sSerialNumber = mGetSerialNumber();
     sDeviceVersion = mGetDeviceVersion();
@@ -1270,7 +1278,7 @@ const char* cWM3000iServer::mSetPCBVersion(char* s) {
 
 const char* cWM3000iServer::mGetPCBVersion() {
     return mGetText(hwGetPCBVersion);
-};
+}
 
 
 const char* cWM3000iServer::mGetCTRLVersion() {
@@ -1491,21 +1499,126 @@ bool cWM3000iServer::isAtmelRunning()
 }
 
 
-void cWM3000iServer::wait4AtmelRunning()
+bool cWM3000iServer::wait4AtmelRunning()
 {
     int i;
+    bool running;
 
     for (i=0; i<100; i++)
     {
-        if (isAtmelRunning())
+        running = isAtmelRunning();
+        if (running)
             break;
         usleep(100000);
     }
 
     if (DEBUG1)
-        if (i==100)
+        if (!running)
             syslog(LOG_ERR,"atmel not running\n");
 
+    return running;
+
+}
+
+
+bool cWM3000iServer::programAtmelFlash()
+{
+    int fd;
+
+    syslog(LOG_INFO,"Starting programming atmel flash\n");
+
+    if ( (fd = open(m_sFPGADeviceNode.latin1(),O_RDWR)) < 0 )
+    {
+        if (DEBUG1)  syslog(LOG_ERR,"error opening fpga device: %s\n",m_sFPGADeviceNode.latin1());
+        return false;
+    }
+    else
+    {
+        ulong pcbTestReg;
+        int r;
+        if ( (r = lseek(fd,0xffc,0)) < 0 )
+        {
+            if  (DEBUG1)  syslog(LOG_ERR,"error positioning fpga device: %s\n",m_sFPGADeviceNode.latin1());
+            syslog(LOG_ERR,"Programming atmel failed\n");
+            close(fd);
+            return false;
+        }
+
+        r = read(fd,(char*) &pcbTestReg,4);
+        if (DEBUG1)  syslog(LOG_ERR,"reading fpga adr 0xffc =  %d\n", pcbTestReg);
+        if (r < 0 )
+        {
+            if (DEBUG1)  syslog(LOG_ERR,"error reading fpga device: %s\n",m_sFPGADeviceNode.latin1());
+            syslog(LOG_ERR,"Programming atmel failed\n");
+            return  false;
+        }
+
+        pcbTestReg |= 0x10000; // set bit for atmel reset
+        if (DEBUG1)  syslog(LOG_INFO,"writing fpga adr 0xffc =  %d\n", pcbTestReg);
+        r = write(fd, (char*) &pcbTestReg,4);
+        close(fd);
+
+        if (r < 0 )
+        {
+            if (DEBUG1)  syslog(LOG_ERR,"error writing fpga device: %s\n",m_sFPGADeviceNode.latin1());
+            syslog(LOG_ERR,"Programming atmel failed\n");
+            return false;
+        }
+
+        usleep(100); // give atmel some time for reset
+
+        pcbTestReg &= 0xFFFE0000; // reset bit for atmel reset
+        if (DEBUG1)  syslog(LOG_INFO,"writing fpga adr 0xffc =  %d\n", pcbTestReg);
+        r = write(fd, (char*) &pcbTestReg,4);
+        close(fd);
+
+        if (r < 0 )
+        {
+            if (DEBUG1)  syslog(LOG_ERR,"error writing fpga device: %s\n",m_sFPGADeviceNode.latin1());
+            syslog(LOG_ERR,"Programming atmel failed\n");
+            return false;
+        }
+
+        // atmel is reset
+        usleep(100000); // now we wait for 100ms so boorloader is running definitely
+
+        char PAR[1];
+        struct bl_cmd blReadInfoCMD = {cmdcode: blReadInfo, par:  PAR, plen: 0, cmdlen: 0, cmddata: 0, RM:  0};
+
+        if ( (I2CBootloaderCommand(&blReadInfoCMD) != 0) || (blReadInfoCMD.RM) )
+        {
+            if (DEBUG1) syslog(LOG_ERR,"Reading atmel info failed\n");
+            syslog(LOG_ERR,"Programming atmel failed\n");
+            return false;
+        }
+
+        // we stopped bootloader to run into application, now we can start programming flash
+
+        QByteArray ba;
+        ba = QString(atmelFlashfilePath).toLatin1();
+        mControlerFlashUpdate(ba.data());
+        if (Answer == ACKString)
+        {
+            syslog(LOG_INFO,"Programming atmel passed\n");
+
+            // we must restart atmel now
+            ba = QString("").toLatin1();
+            mControlerStartProgram(ba.data());
+            if (Answer != ACKString)
+            {
+                syslog(LOG_ERR,"Restart atmel after programming failed\n");
+                return false;
+            }
+
+            return true;
+        }
+        else
+        {
+            if (DEBUG1) syslog(LOG_ERR,"Writing atmel flash failed\n");
+            syslog(LOG_ERR,"Programming atmel failed\n");
+            return false;
+        }
+    }
 }
 
 
