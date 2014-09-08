@@ -1,7 +1,9 @@
 TEMPLATE	= app
 LANGUAGE	= C++
 
-CONFIG	+= qt warn_on release
+QMAKE_CXXFLAGS += -O0
+
+CONFIG	+= qt warn_on release debug
 
 HEADERS	+= cmdinterpret.h \
 	crcutils.h \
