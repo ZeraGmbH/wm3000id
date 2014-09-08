@@ -1601,7 +1601,7 @@ bool cWM3000iServer::programAtmelFlash()
         struct bl_cmd blReadInfoCMD = {cmdcode: blReadInfo, par:  PAR, plen: 0, cmdlen: 0, cmddata: 0, RM:  0};
 
         int dlen = I2CBootloaderCommand(&blReadInfoCMD);
-        if ( (dlen > 5) &&  (blReadInfoCMD.RM == 0) ) // we expect minimum 6 chars
+        if ( !((dlen > 5) &&  (blReadInfoCMD.RM == 0)) ) // we expect minimum 6 chars
         {
             syslog(LOG_ERR,"Reading atmel info failed\n");
             syslog(LOG_ERR,"Programming atmel failed\n");
