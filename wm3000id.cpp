@@ -1600,6 +1600,7 @@ bool cWM3000iServer::programAtmelFlash()
         char PAR[1];
         struct bl_cmd blReadInfoCMD = {cmdcode: blReadInfo, par:  PAR, plen: 0, cmdlen: 0, cmddata: 0, RM:  0};
 
+                                       /*
         int dlen = I2CBootloaderCommand(&blReadInfoCMD);
         if ( !((dlen > 5) &&  (blReadInfoCMD.RM == 0)) ) // we expect minimum 6 chars
         {
@@ -1609,7 +1610,7 @@ bool cWM3000iServer::programAtmelFlash()
         }
 
         // we stopped bootloader to run into application, now we can start programming flash
-
+*/
         QByteArray ba;
         ba = QString(atmelFlashfilePath).toLatin1();
         mControlerFlashUpdate(ba.data());
