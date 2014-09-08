@@ -1529,7 +1529,7 @@ bool cWM3000iServer::programAtmelFlash()
 
     if ( (fd = open(m_sFPGADeviceNode.latin1(),O_RDWR)) < 0 )
     {
-        if (DEBUG1)  syslog(LOG_ERR,"error opening fpga device: %s\n",m_sFPGADeviceNode.latin1());
+        syslog(LOG_ERR,"error opening fpga device: %s\n",m_sFPGADeviceNode.latin1());
         return false;
     }
     else
@@ -1538,14 +1538,14 @@ bool cWM3000iServer::programAtmelFlash()
         int r;
         if ( (r = lseek(fd,0xffc,0)) < 0 )
         {
-            if  (DEBUG1)  syslog(LOG_ERR,"error positioning fpga device: %s\n",m_sFPGADeviceNode.latin1());
+            syslog(LOG_ERR,"error positioning fpga device: %s\n",m_sFPGADeviceNode.latin1());
             syslog(LOG_ERR,"Programming atmel failed\n");
             close(fd);
             return false;
         }
 
         r = read(fd,(char*) &pcbTestReg,4);
-        if (DEBUG1)  syslog(LOG_ERR,"reading fpga adr 0xffc =  %d\n", pcbTestReg);
+        syslog(LOG_ERR,"reading fpga adr 0xffc =  %d\n", pcbTestReg);
         if (r < 0 )
         {
             if (DEBUG1)  syslog(LOG_ERR,"error reading fpga device: %s\n",m_sFPGADeviceNode.latin1());
@@ -1553,28 +1553,28 @@ bool cWM3000iServer::programAtmelFlash()
             return  false;
         }
 
-        pcbTestReg |= 0x10000; // set bit for atmel reset
-        if (DEBUG1)  syslog(LOG_INFO,"writing fpga adr 0xffc =  %d\n", pcbTestReg);
+        pcbTestReg |= 0x80000000; // set bit for atmel reset
+        syslog(LOG_INFO,"writing fpga adr 0xffc =  %d\n", pcbTestReg);
         r = write(fd, (char*) &pcbTestReg,4);
         close(fd);
 
         if (r < 0 )
         {
-            if (DEBUG1)  syslog(LOG_ERR,"error writing fpga device: %s\n",m_sFPGADeviceNode.latin1());
+            syslog(LOG_ERR,"error writing fpga device: %s\n",m_sFPGADeviceNode.latin1());
             syslog(LOG_ERR,"Programming atmel failed\n");
             return false;
         }
 
         usleep(100); // give atmel some time for reset
 
-        pcbTestReg &= 0xFFFE0000; // reset bit for atmel reset
+        pcbTestReg &= 0x7FFF0000; // reset bit for atmel reset
         if (DEBUG1)  syslog(LOG_INFO,"writing fpga adr 0xffc =  %d\n", pcbTestReg);
         r = write(fd, (char*) &pcbTestReg,4);
         close(fd);
 
         if (r < 0 )
         {
-            if (DEBUG1)  syslog(LOG_ERR,"error writing fpga device: %s\n",m_sFPGADeviceNode.latin1());
+            syslog(LOG_ERR,"error writing fpga device: %s\n",m_sFPGADeviceNode.latin1());
             syslog(LOG_ERR,"Programming atmel failed\n");
             return false;
         }
@@ -1587,7 +1587,7 @@ bool cWM3000iServer::programAtmelFlash()
 
         if ( (I2CBootloaderCommand(&blReadInfoCMD) != 0) || (blReadInfoCMD.RM) )
         {
-            if (DEBUG1) syslog(LOG_ERR,"Reading atmel info failed\n");
+            syslog(LOG_ERR,"Reading atmel info failed\n");
             syslog(LOG_ERR,"Programming atmel failed\n");
             return false;
         }
@@ -1614,7 +1614,7 @@ bool cWM3000iServer::programAtmelFlash()
         }
         else
         {
-            if (DEBUG1) syslog(LOG_ERR,"Writing atmel flash failed\n");
+            syslog(LOG_ERR,"Writing atmel flash failed\n");
             syslog(LOG_ERR,"Programming atmel failed\n");
             return false;
         }
