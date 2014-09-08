@@ -1553,14 +1553,6 @@ bool cWM3000iServer::programAtmelFlash()
             return  false;
         }
 
-        if ( (r = lseek(fd,0xffc,0)) < 0 )
-        {
-            syslog(LOG_ERR,"error positioning fpga device: %s\n",m_sFPGADeviceNode.latin1());
-            syslog(LOG_ERR,"Programming atmel failed\n");
-            close(fd);
-            return false;
-        }
-
         pcbTestReg |= 0x80000000; // set bit for atmel reset
         syslog(LOG_INFO,"writing fpga adr 0xffc =  %x\n", pcbTestReg);
         r = write(fd, (char*) &pcbTestReg,4);
@@ -1573,14 +1565,6 @@ bool cWM3000iServer::programAtmelFlash()
         }
 
         usleep(100); // give atmel some time for reset
-
-        if ( (r = lseek(fd,0xffc,0)) < 0 )
-        {
-            syslog(LOG_ERR,"error positioning fpga device: %s\n",m_sFPGADeviceNode.latin1());
-            syslog(LOG_ERR,"Programming atmel failed\n");
-            close(fd);
-            return false;
-        }
 
         pcbTestReg &= 0x7FFF0000; // reset bit for atmel reset
         syslog(LOG_INFO,"writing fpga adr 0xffc =  %x\n", pcbTestReg);
@@ -1597,23 +1581,9 @@ bool cWM3000iServer::programAtmelFlash()
         // atmel is reset
         usleep(100000); // now we wait for 100ms so bootloader is running definitely
 
-        char PAR[1];
-        struct bl_cmd blReadInfoCMD = {cmdcode: blReadInfo, par:  PAR, plen: 0, cmdlen: 0, cmddata: 0, RM:  0};
-
-                                       /*
-        int dlen = I2CBootloaderCommand(&blReadInfoCMD);
-        if ( !((dlen > 5) &&  (blReadInfoCMD.RM == 0)) ) // we expect minimum 6 chars
-        {
-            syslog(LOG_ERR,"Reading atmel info failed\n");
-            syslog(LOG_ERR,"Programming atmel failed\n");
-            return false;
-        }
-
-        // we stopped bootloader to run into application, now we can start programming flash
-*/
         QByteArray ba;
         ba = QString(atmelFlashfilePath).toLatin1();
-        mControlerFlashUpdate(ba.data());
+        mControlerFlashUpdate(ba.data()); // we stop bootloader to run to application here
         if (Answer == ACKString)
         {
             syslog(LOG_INFO,"Programming atmel passed\n");

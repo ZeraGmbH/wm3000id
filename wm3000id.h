@@ -97,7 +97,7 @@ struct bl_cmd {
 
 enum enConfFlags { blAutoIncr = 1, blReadCommandsAvail = 2};
 
-struct blInfo {
+struct blInfo { // do not change this format !!!!!!
     ushort ConfigurationFlags;
     ushort MemPageSize;
     uchar AdressPointerSize;
