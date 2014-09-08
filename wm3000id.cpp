@@ -1564,7 +1564,6 @@ bool cWM3000iServer::programAtmelFlash()
         pcbTestReg |= 0x80000000; // set bit for atmel reset
         syslog(LOG_INFO,"writing fpga adr 0xffc =  %x\n", pcbTestReg);
         r = write(fd, (char*) &pcbTestReg,4);
-        close(fd);
 
         if (r < 0 )
         {
