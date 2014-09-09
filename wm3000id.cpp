@@ -1553,7 +1553,7 @@ bool cWM3000iServer::programAtmelFlash()
             return  false;
         }
 
-        pcbTestReg |= 0x80000000; // set bit for atmel reset
+        pcbTestReg |=  1 << (atmelResetBit-1); // set bit for atmel reset
         syslog(LOG_INFO,"writing fpga adr 0xffc =  %x\n", pcbTestReg);
         r = write(fd, (char*) &pcbTestReg,4);
 
@@ -1566,7 +1566,7 @@ bool cWM3000iServer::programAtmelFlash()
 
         usleep(100); // give atmel some time for reset
 
-        pcbTestReg &= 0x7FFF0000; // reset bit for atmel reset
+        pcbTestReg &=  ~(1 << (atmelResetBit-1)); // reset bit for atmel reset
         syslog(LOG_INFO,"writing fpga adr 0xffc =  %x\n", pcbTestReg);
         r = write(fd, (char*) &pcbTestReg,4);
         close(fd);
