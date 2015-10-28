@@ -268,6 +268,7 @@ private:
     int PSamples; // 80 od. 256 default 80 , führt zu Anpassung der adc clk
     QString sSerialNumber;
     QString sDeviceVersion; // version der hardware
+    QString sCTRLVersion; // version des controlers
     QDateTime DateTime; // datum,uhrzeit
     
     QString m_sFPGADeviceNode; // für den zugriff zur hardware (fpga register)
