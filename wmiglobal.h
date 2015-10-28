@@ -21,6 +21,9 @@
 // intel hexfile gelesen und in den atmel geschrieben. danach wir die apllikation gestartet und gewartet
 // dass der atmel läuft. wenn ja, dann wird das file gelöscht.
 
+// V2.06 es wurde die berechnung der phasenkorrektur notwendig durch die sample frequenz änderung
+// des sigma delta wandlers angepass
+
 #ifndef WMGOBAL_H
 #define WMGLOBAL_H
 
@@ -28,7 +31,7 @@
 #define CheckSumOffset 56
 #define LeiterkartenName "wm3000i"
 #define ServerBasisName "wm3000id"
-#define ServerVersion "V2.05"
+#define ServerVersion "V2.06"
 #define InpBufSize 4096
 #define atmelFlashfilePath "/opt/zera/bin/atmel.hex"
 #define atmelResetBit 16
