@@ -24,6 +24,8 @@
 // V2.06 es wurde die berechnung der phasenkorrektur notwendig durch die sample frequenz änderung
 // des sigma delta wandlers angepass
 
+// V2.07 es wurde beim sample mode der mode 4 hinzugefügt (dc offset abgleich)
+
 #ifndef WMGOBAL_H
 #define WMGLOBAL_H
 
@@ -31,7 +33,7 @@
 #define CheckSumOffset 56
 #define LeiterkartenName "wm3000i"
 #define ServerBasisName "wm3000id"
-#define ServerVersion "V2.06"
+#define ServerVersion "V2.07"
 #define InpBufSize 4096
 #define atmelFlashfilePath "/opt/zera/bin/atmel.hex"
 #define atmelResetBit 16
