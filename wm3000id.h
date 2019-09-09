@@ -45,6 +45,9 @@
 #define ch0_n 14 /* 14 bereiche für kanal 0 */
 #define ch1_n 24 /* 24 bereiche für kanal 1 */ 
 
+#define ch0_nV208 18 /* 18 bereiche für kanal 0  ab v2.08*/
+#define ch1_nV208 22 /* 22 bereiche für kanal 1  ab v2.08*/
+
 enum hw_cmdcode {	hwGetSerialNr = 0x0001,	hwGetDevName = 0x0002,
 			hwGetCtrlVersion = 0x0003,	hwGetLCAVersion = 0x0004,
 			hwGetPCBVersion = 0x0005,hwSetSerialNr = 0x0006,
@@ -243,8 +246,22 @@ private:
     int I2CBootloaderCommand(bl_cmd*);
     char* GenAdressPointerParameter(uchar adresspointerSize, ulong adr);
     
+    bool readJustFlash(QByteArray& jdata);
+    bool validJustData(QByteArray& jdata);
+    bool fetchJustData(QByteArray& jdata);
+    void fetchJustDataVersion(QByteArray& jdata);
+    bool jdvGreater(QString ver);
+    bool m_bNewJustData;
     bool ReadJustData();
+    void initJustData();
+    void SetDeviceRanges();
+    void ReadJustDataVersion();
+    void setDefaultADCJustData(); // wenn die adc's noch nicht korrigiert wurden -> dann tun wir das hier mit default werten
+    QString getFreqCode();
+    int  arraySizeCh0, arraySizeCh1;
+
     Q_UINT16 m_nChksumFlash;
+    QString m_sJustDataVersion; // die serverversion mit der die justagedaten geschrieben wurden
     
     QStringList CValueList; // fürs dekodieren liste aller bereitgestellten korrekturwerte 
     QStringList CCoeffientList; // dito für die koeffizienten
@@ -276,5 +293,6 @@ private:
     QString Answer;
     int m_nJDataStat;
     double SampleFrequency;
+    double SignalFrequency;
 };
 #endif
