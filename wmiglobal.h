@@ -41,6 +41,6 @@
 #define atmelResetBit 16
 
 // wenn WMDEBUG -> kein fork() 
-//#define WMDEBUG 1
+#define WMDEBUG 1
 
 #endif
