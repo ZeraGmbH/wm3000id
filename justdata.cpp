@@ -62,8 +62,8 @@ cJustData::cJustData(int order,double init)
 
 cJustData::~cJustData()
 {
-    delete m_pCoefficient;
-    delete m_pJustNode;
+    delete [] m_pCoefficient;
+    delete [] m_pJustNode;
 }
 
 
