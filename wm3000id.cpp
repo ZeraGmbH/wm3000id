@@ -138,44 +138,7 @@ QStringList MeasChannelList;
 
 cWM3000iServer::cWM3000iServer() 
     :cZHServer() {
-    
-    cParse* parser = new(cParse); // das ist der parser
-    pCmdInterpreter = new cCmdInterpreter(this,InitCmdTree(),parser); // das ist der kommando interpreter
-    
-    ReadJustDataVersion();
-    SetDeviceRanges();
-    initJustData();
 
-    MeasChannelList << "ch0" << "ch1";
-    CValueList << "CAMPLITUDE" << "CPHASE" << "COFFSET";
-    
-    ChannelRangeArrayMap["ch0"] = &RangeCh0[0]; // alle sRange* / kanal
-    ChannelRangeArrayMap["ch1"] = &RangeCh1[0];
-    sRange* sr=&RangeCh0[0];
-    for (unsigned int i = 0; i<(sizeof(RangeCh0)/sizeof(sRange)); i++,sr++) {
-	Ch0RangeList << sr->RName;
-	sr->pJustData=new cWMJustData; // default justage werte
-    }
-    sr=&RangeCh1[0];
-    for (unsigned int i = 0; i<(sizeof(RangeCh1)/sizeof(sRange)); i++,sr++) {
-	Ch1RangeList << sr->RName;
-	sr->pJustData=new cWMJustData; // default justage werte
-    }
-    ChannelRangeListMap["ch0"] = &Ch0RangeList;
-    ChannelRangeListMap["ch1"] = &Ch1RangeList;
-    ChannelCValueListMap["ch0"] = &CValueList; // die sensorik für beide kanäle ist gleich
-    ChannelCValueListMap["ch1"] = &CValueList; // -> auch die gleichen korrekturwerte listen
-    CCoeffientList << "GCC0" << "GCC1" << "PCC0" << "PCC1" << "PCC2" << "PCC3" << "OCC0";  // wir brauchen hier nur eine für beide kanäle  
-    ChannelCCoeffientListMap["ch0"] = &CCoeffientList; // s.o. beide gleich
-    ChannelCCoeffientListMap["ch1"] = &CCoeffientList;
-    
-    CNodeList << "GCN0" << "GCN1" << "PCN0" << "PCN1" << "PCN2" << "PCN3" << "OCN0";    
-    ChannelCNodeListMap["ch0"] = &CNodeList; // s.o. beide gleich
-    ChannelCNodeListMap["ch1"] = &CNodeList;
-    
-    ChannelSockListMap["ch0"] = &SockList0;
-    ChannelSockListMap["ch1"] = &SockList1;
-    
     DebugLevel = 0; // MaxDebugLevel; // default
     PSamples = 80; // default
     SMode = 0; // default
@@ -188,6 +151,30 @@ cWM3000iServer::cWM3000iServer()
     DateTime = QDateTime(QDate(8000,12,24));
 
     m_sFPGADeviceNode = FPGADeviceNode;
+    
+    cParse* parser = new(cParse); // das ist der parser
+    pCmdInterpreter = new cCmdInterpreter(this,InitCmdTree(),parser); // das ist der kommando interpreter
+    
+    ReadJustDataVersion();
+    SetDeviceRanges();
+    initJustData();
+
+    MeasChannelList << "ch0" << "ch1";
+    CValueList << "CAMPLITUDE" << "CPHASE" << "COFFSET";
+    
+    ChannelCValueListMap["ch0"] = &CValueList; // die sensorik für beide kanäle ist gleich
+    ChannelCValueListMap["ch1"] = &CValueList; // -> auch die gleichen korrekturwerte listen
+
+    CCoeffientList << "GCC0" << "GCC1" << "PCC0" << "PCC1" << "PCC2" << "PCC3" << "OCC0";  // wir brauchen hier nur eine für beide kanäle
+    ChannelCCoeffientListMap["ch0"] = &CCoeffientList; // s.o. beide gleich
+    ChannelCCoeffientListMap["ch1"] = &CCoeffientList;
+    
+    CNodeList << "GCN0" << "GCN1" << "PCN0" << "PCN1" << "PCN2" << "PCN3" << "OCN0";    
+    ChannelCNodeListMap["ch0"] = &CNodeList; // s.o. beide gleich
+    ChannelCNodeListMap["ch1"] = &CNodeList;
+    
+    ChannelSockListMap["ch0"] = &SockList0;
+    ChannelSockListMap["ch1"] = &SockList1;
 
     QFile atmelFile(atmelFlashfilePath);
     if (atmelFile.exists())
