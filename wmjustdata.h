@@ -10,7 +10,7 @@
 
 enum jDataStatus { wrongVERS = 2, wrongSNR = 4};
 
-const int GainCorrOrder = 1;
+const int GainCorrOrder = 3;
 const int PhaseCorrOrder  = 3;
 const int OffsetCorrOrder = 0;
 	
@@ -31,6 +31,7 @@ public:
     void DeserializeStatus(const QString&);
     void setStatus(int stat);
     int getStatus();
+    void setDefault();
     
 private:    
     int m_nStatus;
