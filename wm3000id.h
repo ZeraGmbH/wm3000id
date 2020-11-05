@@ -46,7 +46,7 @@
 #define ch1_n 24 /* 24 bereiche für kanal 1 */ 
 
 #define ch0_nV208 18 /* 18 bereiche für kanal 0  ab v2.08*/
-#define ch1_nV208 22 /* 22 bereiche für kanal 1  ab v2.08*/
+#define ch1_nV208 28 /* 22 bereiche für kanal 1  ab v2.08*/
 
 enum hw_cmdcode {	hwGetSerialNr = 0x0001,	hwGetDevName = 0x0002,
 			hwGetCtrlVersion = 0x0003,	hwGetLCAVersion = 0x0004,
@@ -190,6 +190,7 @@ private:
     const char* mGetDeviceVersion();
     const char* mGetServerVersion();  
   
+    bool getAdjustment();
     // die routinen für das status modell
     
     const char* mGetAdjustmentStatus();
@@ -253,10 +254,11 @@ private:
     bool jdvGreater(QString ver);
     bool m_bNewJustData;
     bool ReadJustData();
-    void initJustData();
     void SetDeviceRanges();
     void ReadJustDataVersion();
     void setDefaultADCJustData(); // wenn die adc's noch nicht korrigiert wurden -> dann tun wir das hier mit default werten
+    void setDefaultRangeJustData(); //
+
     QString getFreqCode();
     int  arraySizeCh0, arraySizeCh1;
 

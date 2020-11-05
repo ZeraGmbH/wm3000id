@@ -109,7 +109,15 @@ static sRange RangeCh0V208[ch0_nV208]=
 
 
 static sRange RangeCh1V208[ch1_nV208]=
-                  {{ "15.0A"   ,"15.0"  ,"3595118"  ,0 ,  Ampere, rngPhys, NULL},
+                  {{"ADW80.16"  ,"ADW80.16"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW80.50"  ,"ADW80.50"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW80.60"  ,"ADW80.60"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+
+                   {"ADW256.16"  ,"ADW256.16"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW256.50"  ,"ADW256.50"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW256.60"  ,"ADW256.60"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+
+                   { "15.0A"   ,"15.0"  ,"3595118"  ,0 ,  Ampere, rngPhys, NULL},
                    { "10.0A"  ,"10.0"  ,"4793490"  ,1 , Ampere, rngPhys,NULL},
                    { "5.0A"    ,"5.0"    ,"4793490"  ,2 , Ampere, rngPhys,NULL},
                    { "2.5A" ,"2.5"    ,"4793490"  ,3 , Ampere, rngPhys,NULL},
@@ -157,7 +165,6 @@ cWM3000iServer::cWM3000iServer()
     
     ReadJustDataVersion();
     SetDeviceRanges();
-    initJustData();
 
     MeasChannelList << "ch0" << "ch1";
     CValueList << "CAMPLITUDE" << "CPHASE" << "COFFSET";
@@ -188,7 +195,17 @@ cWM3000iServer::cWM3000iServer()
     sSerialNumber = mGetSerialNumber();
     sDeviceVersion = mGetDeviceVersion();
     sCTRLVersion = mGetCTRLVersion();
-    ReadJustData();
+
+    ReadJustData(); // wir lesen die justagedaten
+
+    if (m_bNewJustData && !getAdjustment() && EEPromAccessEnable())
+    {   // wenn gerät nicht justiert ist und der justagestecker steckt ......
+        if (!jdvGreater("V2.07"))
+            setDefaultRangeJustData();
+            // weil sich die bedeutung der justageeinträge geändert hat, wird alles neu justiert.
+
+        setDefaultADCJustData();
+    }
 }
 
 
@@ -570,30 +587,6 @@ bool cWM3000iServer::ReadJustData()
 }
 
 
-void cWM3000iServer::initJustData()
-{
-    sRange* sr = ChannelRangeArrayMap["ch0"];
-    for (unsigned int i = 0; i<(arraySizeCh0/sizeof(sRange)); i++,sr++)
-    {
-        Ch0RangeList << sr->RName;
-        sr->pJustData=new cWMJustData; // default justage werte
-    }
-
-    sr = ChannelRangeArrayMap["ch1"];
-    for (unsigned int i = 0; i<(arraySizeCh1/sizeof(sRange)); i++,sr++)
-    {
-        Ch1RangeList << sr->RName;
-        sr->pJustData=new cWMJustData; // default justage werte
-    }
-
-    ChannelRangeListMap["ch0"] = &Ch0RangeList;
-    ChannelRangeListMap["ch1"] = &Ch1RangeList;
-
-    if (m_bNewJustData)
-        setDefaultADCJustData();
-}
-
-
 void cWM3000iServer::SetDeviceRanges()
 {
     if (jdvGreater(QString("V2.07")) || EEPromAccessEnable())
@@ -637,7 +630,7 @@ void cWM3000iServer::ReadJustDataVersion()
 void cWM3000iServer::setDefaultADCJustData()
 {
     QList<QString> keyList;
-    QString channel;
+    QStringList channelList;
     QHash<QString, QList<double> > corrNodeHash;
 
     QList<double> li8016;
@@ -664,27 +657,47 @@ void cWM3000iServer::setDefaultADCJustData()
     li25660 << 0.999405 << 0.1 << 0.999621 << 40.0 << 0.999770 << 50.0 << 0.999970 << 60.61;
     corrNodeHash["ADW256.60"] = li25660;
 
-    channel = "ch0";
     keyList = corrNodeHash.keys();
+    channelList << "ch0" << "ch1";
 
-    for (int i = 0; i < keyList.count(); i++)
+    for (int i = 0; i < channelList.count(); i++)
     {
-        QString rname;
-        rname = keyList.at(i);
-        sRange* rng = SearchRange(channel, rname);
-        if ((rng != 0) && (rng->pJustData->getStatus() == 0)) // wenn der adw bereich nicht justiert ist
+        QString channel;
+        channel = channelList.at(i);
+        for (int j = 0; j < keyList.count(); j++)
         {
-            QList<double> liNodes;
-            liNodes = corrNodeHash[rname];
-            int n = liNodes.count() >> 1; // wir unterstellen werte paare
+            QString rname;
+            rname = keyList.at(j);
+            sRange* rng = SearchRange(channel, rname);
+            if (rng != 0)
+            {
+                QList<double> liNodes;
+                liNodes = corrNodeHash[rname];
+                int n = liNodes.count() >> 1; // wir unterstellen werte paare
 
-            for (int j = 0; j < n; j++)
-                rng->pJustData->m_pPhaseCorrection->setNode(j, cJustNode(liNodes[j*2], liNodes[j*2+1]));
+                for (int k = 0; k < n; k++)
+                    rng->pJustData->m_pGainCorrection->setNode(k, cJustNode(liNodes[k*2], liNodes[k*2+1]));
 
-            rng->pJustData->m_pPhaseCorrection->cmpCoefficients();
-            rng->pJustData->setStatus(80); // die werte sind justiert !!!
+                rng->pJustData->m_pGainCorrection->cmpCoefficients();
+                rng->pJustData->setStatus(0); // die werte sind erst einmal nicht justiert
+                // wir müssen eh noch phasenjustage laufen lassen ....
+            }
         }
+    }
+}
 
+void cWM3000iServer::setDefaultRangeJustData()
+{
+    sRange* sr = ChannelRangeArrayMap["ch0"];
+    for (unsigned int i = 0; i<(arraySizeCh0/sizeof(sRange)); i++,sr++)
+    {
+        sr->pJustData->setDefault();
+    }
+
+    sr = ChannelRangeArrayMap["ch1"];
+    for (unsigned int i = 0; i<(arraySizeCh1/sizeof(sRange)); i++,sr++)
+    {
+        sr->pJustData->setDefault();
     }
 }
 
@@ -1601,26 +1614,37 @@ const char* cWM3000iServer::mGetServerVersion() {
 }
 
 
-const char* cWM3000iServer::mGetAdjustmentStatus() {
+bool cWM3000iServer::getAdjustment()
+{
     bool adjusted = true;
-    int adj;
-    for (QStringList::iterator it=MeasChannelList.begin(); it !=MeasChannelList.end(); it++) {	   		QStringList* sl=ChannelRangeListMap.find(*it).data(); 
-	QStringList::Iterator it3;
-	for ( it3 = sl->begin(); it3 != sl->end(); ++it3 ) {
-	    sRange* rng = SearchRange(*it,*it3);
-	    adjusted = adjusted && ( (rng -> pJustData -> getStatus() & (RangeGainJustified + RangePhaseJustified))  == (RangeGainJustified + RangePhaseJustified) );
-	}
+
+    for (QStringList::iterator it=MeasChannelList.begin(); it !=MeasChannelList.end(); it++)
+    {
+        QStringList* sl=ChannelRangeListMap.find(*it).data();
+        QStringList::Iterator it3;
+        for ( it3 = sl->begin(); it3 != sl->end(); ++it3 )
+        {
+            sRange* rng = SearchRange(*it,*it3);
+            adjusted = adjusted && ( (rng -> pJustData -> getStatus() & (RangeGainJustified + RangePhaseJustified))  == (RangeGainJustified + RangePhaseJustified) );
+        }
     }
-    
-    if (adjusted)
-	adj = 0;
+
+    return adjusted;
+}
+
+
+const char* cWM3000iServer::mGetAdjustmentStatus() {
+    int adj;
+
+    if (getAdjustment())
+        adj = 0;
     else
-	adj = 1;
-    
+        adj = 1;
+
     adj += m_nJDataStat;
-    
+
     Answer = QString("%1").arg(adj);
-    
+
     return Answer.latin1();
 }
 
@@ -2108,90 +2132,100 @@ const char* cWM3000iServer::mGetStatus() {
 }
 
 
-const char* cWM3000iServer::mGetCValue(char* s) { // abfrage des korrekturwertes (ev. mit parameter)
+const char* cWM3000iServer::mGetCValue(char* s) // abfrage des korrekturwertes (ev. mit parameter)
+{
     bool ok;
-    QString par = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
-    QString dedicatedChannel = pCmdInterpreter->dedicatedList.first();
+    QString par;
+    QString ads;
+    QString adwrange;
+    QString dedicatedChannel, dedicatedRange, dedicatedsCValue;
+    int samples;
+    sRange* rangeSense;
+    sRange* rangeADW;
+
+
+    par = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
+    dedicatedChannel = pCmdInterpreter->dedicatedList.first();
     pCmdInterpreter->dedicatedList.pop_front();
-    QString dedicatedRange = pCmdInterpreter->dedicatedList.first();
-    sRange* rangeSense=SearchRange(dedicatedChannel,dedicatedRange);
+    dedicatedRange = pCmdInterpreter->dedicatedList.first();
+    rangeSense=SearchRange(dedicatedChannel,dedicatedRange);
     pCmdInterpreter->dedicatedList.pop_front();
-    QString dedicatedsCValue = pCmdInterpreter->dedicatedList.first();
-    if (dedicatedsCValue == "CAMPLITUDE")
+    dedicatedsCValue = pCmdInterpreter->dedicatedList.first();
+    samples = QString(mGetPSamples()).toInt();
+    ads = (samples == 80) ? "ADW80" : "ADW256";
+
+    if (m_bNewJustData)
     {
-        QString s;
-        int samples;
-        double ampl;
-
-        samples = QString(mGetPSamples()).toInt();
-        s = (samples == 80) ? "ADW80" : "ADW256";
-        ampl = par.toDouble(&ok);
-
-        if (m_bNewJustData)
-        {
-            QString adwChannel, adwrange;
-
-            adwChannel = "ch0";
-            adwrange = QString("%1.%2").arg(s).arg(getFreqCode());
-            sRange* rangeADW=SearchRange(adwChannel, adwrange);
-            if (ok)
-            {
-                Answer = QString::number(rangeADW->pJustData->m_pPhaseCorrection->getCorrection(SignalFrequency) * rangeSense->pJustData->m_pGainCorrection->getCorrection(ampl)); // acknowledge
-            }
-            else
-                Answer = ERRVALString; // error value
-        }
-        else
-        {
-            sRange* rangeADW=SearchRange(dedicatedChannel,s);
-            if (ok)
-            {
-                Answer = QString::number(rangeADW->pJustData->m_pGainCorrection->getCorrection(ampl) * rangeSense->pJustData->m_pGainCorrection->getCorrection(ampl)); // acknowledge
-            }
-            else
-                Answer = ERRVALString; // error value
-        }
+        adwrange = QString("%1.50").arg(ads);
+        rangeADW=SearchRange(dedicatedChannel, adwrange);
+    }
+    else
+    {
+        rangeADW=SearchRange(dedicatedChannel,ads);
     }
 
+    if (dedicatedsCValue == "CAMPLITUDE")
+    {
+        double ampl = par.toDouble(&ok);
+        if (ok)
+        {
+            Answer = QString::number(rangeADW->pJustData->m_pGainCorrection->getCorrection(SignalFrequency) * rangeSense->pJustData->m_pGainCorrection->getCorrection(ampl)); // acknowledge
+        }
+        else
+            Answer = ERRVALString; // error value
+    }
     else
 
     if (dedicatedsCValue == "CPHASE")
     {
-    // phi = delay * signalfreq * 360°
-    // delay = 12.288Mhz * 2 * 283,2uS / mclk
-    // mclk = samplefreq * psamples (80 od. 256) * (8 od. 2) * 256
-    // mclk geändert wegen emv - problemen mclk = samplefreq * psamples (80 od. 256) * (4 od. 1) * 256
-    // -> phi = 12.288 * 2 * 283.2 * 360.0 * signalfreq/ (256 * (512 od. 640) * samplefreq)
-    double f = par.toDouble(&ok);
-    if (ok) {
-        double pkADW;
-        SignalFrequency = f; // we store the value for adw gain correction !!!! not quite clean but....
-        int samples = QString(mGetPSamples()).toInt();
-        if (sCTRLVersion.contains("1."))
-            pkADW = (samples == 80) ? 1/640.0 : 1/512.0;
-        else
-            pkADW = (samples == 80) ? 1/320.0 : 1/256.0;
+        // phi = delay * signalfreq * 360°
+        // delay = 12.288Mhz * 2 * 283,2uS / mclk
+        // mclk = samplefreq * psamples (80 od. 256) * (8 od. 2) * 256
+        // mclk geändert wegen emv - problemen mclk = samplefreq * psamples (80 od. 256) * (4 od. 1) * 256
+        // -> phi = 12.288 * 2 * 283.2 * 360.0 * signalfreq/ (256 * (512 od. 640) * samplefreq)
 
-        // pkADW = -(2.25 + (pkADW * 12.288 * 566.4 * 360.0 * f / (256.0 * SampleFrequency)));
-	    // die 2.25° sind auch frequenzabhängig -> deshalb 
-	    // pkADW = -( (2.25*256.0 + pkADW * 12.288 * 566.4 * 360.0) * f / (256.0 * SampleFrequency));	
-	    // es sind 360.0 / (80 * 2)  bzw. 360 / ( 256 * 2) -> 360/ 2.0*samples 
-	    pkADW = -( ( (360.0*256.0 / (2.0*samples)) + pkADW * 12.288 * 566.4 * 360.0) * f / (256.0 * SampleFrequency));
-	    double pkSense = rangeSense->pJustData->m_pPhaseCorrection->getCorrection(f);
-	    Answer = QString::number(pkSense+pkADW);
-	}
-	else 
-	    Answer = ERRVALString; // error value
+        double f = par.toDouble(&ok);
+
+        if (ok)
+        {
+            double pkADW, pkSense;
+            SignalFrequency = f; // we store the value for adw gain correction !!!! not quite clean but....
+            if (!m_bNewJustData)
+            {
+                if (sCTRLVersion.contains("1."))
+                    pkADW = (samples == 80) ? 1/640.0 : 1/512.0;
+                else
+                    pkADW = (samples == 80) ? 1/320.0 : 1/256.0;
+                // pkADW = -(2.25 + (pkADW * 12.288 * 566.4 * 360.0 * f / (256.0 * SampleFrequency)));
+                // die 2.25° sind auch frequenzabhängig -> deshalb
+                // pkADW = -( (2.25*256.0 + pkADW * 12.288 * 566.4 * 360.0) * f / (256.0 * SampleFrequency));
+                // es sind 360.0 / (80 * 2)  bzw. 360 / ( 256 * 2) -> 360/ 2.0*samples
+                pkADW = -( ( (360.0*256.0 / (2.0*samples)) + pkADW * 12.288 * 566.4 * 360.0) * f / (256.0 * SampleFrequency));
+                pkSense = rangeSense->pJustData->m_pPhaseCorrection->getCorrection(f);
+                Answer = QString::number(pkSense+pkADW);
+            }
+            else
+            {
+                // alles neu macht der mai....äh....oktober ?
+                // da die obige berechnung der phasenkorrektur einen nicht nachvollziehbaren winkelfehler von ca 0.06°
+                // ergibt, rudern wir wieder zurück auf das verfahren von vor gefühlt 100 jahren und messen den phasengang
+                // der adw wandler wieder ein
+                pkADW = rangeADW->pJustData->m_pPhaseCorrection->getCorrection(f);
+                pkSense= rangeSense->pJustData->m_pPhaseCorrection->getCorrection(f);
+                Answer = QString::number(pkSense+pkADW);
+            }
+        }
+        else
+            Answer = ERRVALString; // error value
     }
     else
     if (dedicatedsCValue == "COFFSET")
     {
-	Answer = QString::number(rangeSense->pJustData->m_pOffsetCorrection->getCorrection(1.0)); // parameter dummy
+        Answer = QString::number(rangeSense->pJustData->m_pOffsetCorrection->getCorrection(1.0)); // parameter dummy
     }
-    
+
     return Answer.latin1();
 }
-
 
 const char* cWM3000iServer::mGetRejection() {
     QString dedicatedChannel = pCmdInterpreter->dedicatedList.first();
