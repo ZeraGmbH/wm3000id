@@ -53,20 +53,42 @@ int c24LC256::WriteData(char* data,int n,int adr) {
 
 int c24LC256::ReadData(char* data,int n,int adr) {
     quint8 outpBuf[2];
-    quint8 inpBuf[n];
+    quint8 inpBuf[8192]; // max. 8k byte
+    int toRead,Read;
+    char* dest;
+
+    dest = data;
+    toRead = n;
+    Read = 0;
+
     struct i2c_msg Msgs[2] = { {addr :I2CAdress, flags: 0,len: 2,buf: &(outpBuf[0])}, // 2 messages (tagged format )
-			  {addr :I2CAdress, flags: (I2C_M_RD+I2C_M_NOSTART), len: n, buf: &(inpBuf[0])} };    
-     
+                               {addr :I2CAdress, flags: (I2C_M_RD+I2C_M_NOSTART), len: 0, buf: &(inpBuf[0])} };
+
     struct i2c_rdwr_ioctl_data EEPromData = {  msgs: &(Msgs[0]), nmsgs: 2 };
- 
-    outpBuf[0]=(adr >> 8) & 0xff; outpBuf[1]=adr & 0xff;
-    
-    if ( I2CTransfer(DevNode,I2CAdress,DebugLevel,&EEPromData) == 0 ) { // alles ok und gelesen
-	memcpy((void*)data,(void*)&inpBuf[0],n);
-	return(n);
+
+    while (toRead)
+    {
+        outpBuf[0]=(adr >> 8) & 0xff; outpBuf[1]=adr & 0xff;
+        int l = (toRead > 8192) ? 8192 : toRead;
+
+        Msgs[1].len = l;
+
+        if ( I2CTransfer(DevNode,I2CAdress,DebugLevel,&EEPromData) == 0 )
+        { // einen block bis zu 8k gelesen und ok
+            memcpy((void*)dest,(void*)&inpBuf[0],l); // wir kopieren das ....
+            Read += l;
+            dest += l;
+            adr += l;
+            toRead -=l;
+        }
+        else
+            toRead = 0; // wenn fehler .... aufhören
     }
-    else return(0);
+
+    return(Read);
+
 }
+
 
 int c24LC256::size() {
     return 32768;
