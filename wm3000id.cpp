@@ -606,6 +606,24 @@ void cWM3000iServer::SetDeviceRanges()
         arraySizeCh0 = sizeof(RangeCh0);
         arraySizeCh1 = sizeof(RangeCh1);
     }
+
+    sRange* sr = ChannelRangeArrayMap["ch0"];
+    for (unsigned int i = 0; i<(arraySizeCh0/sizeof(sRange)); i++,sr++)
+    {
+        Ch0RangeList << sr->RName;
+        sr->pJustData=new cWMJustData; // default justage werte
+    }
+
+    sr = ChannelRangeArrayMap["ch1"];
+    for (unsigned int i = 0; i<(arraySizeCh1/sizeof(sRange)); i++,sr++)
+    {
+        Ch1RangeList << sr->RName;
+        sr->pJustData=new cWMJustData; // default justage werte
+    }
+
+    ChannelRangeListMap["ch0"] = &Ch0RangeList;
+    ChannelRangeListMap["ch1"] = &Ch1RangeList;
+
 }
 
 
