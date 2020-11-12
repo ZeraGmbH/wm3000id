@@ -27,14 +27,8 @@ public:
     void Serialize(QDataStream&); // zum schreiben aller justagedaten in flashspeicher
     void Deserialize(QDataStream&); // zum lesen aller justagedaten aus flashspeicher
     
-    QString SerializeStatus(); // fürs xml file
-    void DeserializeStatus(const QString&);
-    void setStatus(int stat);
-    int getStatus();
+    int getStatus(); // gibt den gesamt status der justage zurück 1 = justiert 0 nicht justiert
     void setDefault();
-    
-private:    
-    int m_nStatus;
 };
 
 
