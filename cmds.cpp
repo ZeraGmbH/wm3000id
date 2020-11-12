@@ -38,7 +38,9 @@ cNodeSCPI* Calculate;
 			    cNodeZHServer* CalculateCNameRName;							          cNodeSCPI* CalculateCNameRNameRValue;
 				          cNodeSCPI* CalculateCNameRNameRejection;      
 				          cNodeZHServer* CalculateCNameRNameCValue;
-				          cNodeSCPI* CalculateCNameRNameStatus;
+                          cNodeSCPI* CalculateCNameRNameGStatus;
+                          cNodeSCPI* CalculateCNameRNamePStatus;
+                          cNodeSCPI* CalculateCNameRNameOStatus;
 				          cNodeZHServer* CalculateCNameRNameCCoefficient; // korrekturkoeffizienten
 				          cNodeZHServer* CalculateCNameRNameCNode; // stützstellen
 	      cNodeSCPI* CalculateCompute;		  
@@ -153,8 +155,10 @@ cNode* InitCmdTree() {
     // die QStringList in CalculateCNameRNameCNode wird später in abhängigkeit von CalculateCName gesetzt
     CalculateCNameRNameCCoefficient=new cNodeZHServer(NULL,isQuery | isCommand,CalculateCNameRNameCNode,NULL,SetCValueCCoefficient,GetCValueCCoefficient);
     // die QStringList in CalculateCNameRNameCCoefficient wird später in abhängigkeit von CalculateCName gesetzt
-    CalculateCNameRNameStatus=new cNodeSCPI("STATUS",isQuery | isCommand,CalculateCNameRNameCCoefficient,NULL,SetStatus,GetStatus);
-    CalculateCNameRNameCValue=new cNodeZHServer(NULL,isQuery | isQuerywPar,CalculateCNameRNameStatus,NULL,nixCmd,GetCValue);
+    CalculateCNameRNameGStatus=new cNodeSCPI("GSTATUS",isQuery | isCommand,CalculateCNameRNameCCoefficient,NULL,SetGStatus,GetGStatus);
+    CalculateCNameRNamePStatus=new cNodeSCPI("PSTATUS",isQuery | isCommand,CalculateCNameRNameGStatus,NULL,SetPStatus,GetPStatus);
+    CalculateCNameRNameOStatus=new cNodeSCPI("OSTATUS",isQuery | isCommand,CalculateCNameRNamePStatus,NULL,SetOStatus,GetOStatus);
+    CalculateCNameRNameCValue=new cNodeZHServer(NULL,isQuery | isQuerywPar,CalculateCNameRNameOStatus,NULL,nixCmd,GetCValue);
     // die QStringList in CalculateCNameRNameCValue wird später in abhängigkeit von CalculateCName gesetzt
     CalculateCNameRNameRejection=new cNodeSCPI("REJECTION",isQuery,CalculateCNameRNameCValue,NULL,nixCmd,GetRejection);
     CalculateCNameRNameRValue=new cNodeSCPI("RVALUE",isQuery,CalculateCNameRNameRejection,NULL,nixCmd,GetRValue);
