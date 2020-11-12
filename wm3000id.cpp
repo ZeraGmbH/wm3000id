@@ -697,8 +697,8 @@ void cWM3000iServer::setDefaultADCJustData()
                     rng->pJustData->m_pGainCorrection->setNode(k, cJustNode(liNodes[k*2], liNodes[k*2+1]));
 
                 rng->pJustData->m_pGainCorrection->cmpCoefficients();
-                rng->pJustData->setStatus(0); // die werte sind erst einmal nicht justiert
-                // wir müssen eh noch phasenjustage laufen lassen ....
+                rng->pJustData->m_pGainCorrection->setStatus(1); // die werte sind justiert
+                rng->pJustData->m_pOffsetCorrection->setStatus(1); // adc's haben keinen offset -> justiert
             }
         }
     }
@@ -775,16 +775,7 @@ bool cWM3000iServer::GetAdjInfo(QDomNode n) { // n steht auf einem element desse
 		if (tName2=="Name") { 
 		    rname=e2.text();		    
 		} else
-		    
-	              if (tName2=="Status") {    
-		    it4=RangeJustMap.find(rname);
-		    if (it4 != RangeJustMap.end() ) { // den bereich gibts
-			cWMJustData* jwmd=it4.data();
-			jwmd->DeserializeStatus(e2.text());
-		    }
-		}
-		    
-		if (tName2 == "Gain" || tName2 == "Phase" || tName2 == "Offset") {    
+            if (tName2 == "Gain" || tName2 == "Phase" || tName2 == "Offset") {
 		    it4=RangeJustMap.find(rname);
 		    if (it4 != RangeJustMap.end() ) { // den bereich gibts
 			cWMJustData* jwmd=it4.data();
@@ -803,6 +794,10 @@ bool cWM3000iServer::GetAdjInfo(QDomNode n) { // n steht auf einem element desse
 			    n2 = nl3.item(k);
 			    e3=n2.toElement();
 			    tName3=e3.tagName();
+                if (tName3 == "Status") {
+                if (jd)
+                    jd->DeserializeStatus(e3.text());
+                }
 			    if (tName3 == "Coefficients") {
 				if (jd)
 				    jd->DeserializeCoefficients(e3.text());
@@ -1104,6 +1099,7 @@ const char* cWM3000iServer::mJustData2File(char* s) {
 	QStringList* sl=ChannelRangeListMap.find(*it).data(); 
 	QStringList::Iterator it3;
 	for ( it3 = sl->begin(); it3 != sl->end(); ++it3 ) {
+        QString jdata;
 	    sRange* rng = SearchRange(*it,*it3);
 	    QDomElement rtag = justdata.createElement( "Range" );
 	    chtag.appendChild( rtag );
@@ -1111,16 +1107,14 @@ const char* cWM3000iServer::mJustData2File(char* s) {
 	    rtag.appendChild( tag );
 	    t = justdata.createTextNode(rng->RName);
 	    tag.appendChild( t );
-	    
-	    
-	    tag = justdata.createElement( "Status" );
-	    rtag.appendChild( tag );
-	    QString jdata = rng->pJustData->SerializeStatus();
-	    t = justdata.createTextNode(jdata);
-	    tag.appendChild(t);
-		    
-	    QDomElement gpotag = justdata.createElement( "Gain" );
+
+        QDomElement gpotag = justdata.createElement( "Gain" );
 	    rtag.appendChild(gpotag);    
+        tag = justdata.createElement( "Status" );
+        gpotag.appendChild(tag);
+        jdata = rng->pJustData->m_pGainCorrection->SerializeStatus();
+        t = justdata.createTextNode(jdata);
+        tag.appendChild(t);
 	    tag = justdata.createElement( "Coefficients" );
 	    gpotag.appendChild(tag);
 	    jdata = rng->pJustData->m_pGainCorrection->SerializeCoefficients();
@@ -1131,9 +1125,14 @@ const char* cWM3000iServer::mJustData2File(char* s) {
 	    jdata = rng->pJustData->m_pGainCorrection->SerializeNodes();
 	    t = justdata.createTextNode(jdata);
 	    tag.appendChild(t);
-	    
+
 	    gpotag = justdata.createElement( "Phase" );
 	    rtag.appendChild(gpotag);    
+        tag = justdata.createElement( "Status" );
+        gpotag.appendChild(tag);
+        jdata = rng->pJustData->m_pPhaseCorrection->SerializeStatus();
+        t = justdata.createTextNode(jdata);
+        tag.appendChild(t);
 	    tag = justdata.createElement( "Coefficients" );
 	    gpotag.appendChild(tag);
 	    jdata = rng->pJustData->m_pPhaseCorrection->SerializeCoefficients();
@@ -1146,7 +1145,12 @@ const char* cWM3000iServer::mJustData2File(char* s) {
 	    tag.appendChild(t);
 	    
 	    gpotag = justdata.createElement( "Offset" );
-	    rtag.appendChild(gpotag);    
+        rtag.appendChild(gpotag);
+        tag = justdata.createElement( "Status" );
+        gpotag.appendChild(tag);
+        jdata = rng->pJustData->m_pOffsetCorrection->SerializeStatus();
+        t = justdata.createTextNode(jdata);
+        tag.appendChild(t);
 	    tag = justdata.createElement( "Coefficients" );
 	    gpotag.appendChild(tag);
 	    jdata = rng->pJustData->m_pOffsetCorrection->SerializeCoefficients();
@@ -1643,7 +1647,7 @@ bool cWM3000iServer::getAdjustment()
         for ( it3 = sl->begin(); it3 != sl->end(); ++it3 )
         {
             sRange* rng = SearchRange(*it,*it3);
-            adjusted = adjusted && ( (rng -> pJustData -> getStatus() & (RangeGainJustified + RangePhaseJustified))  == (RangeGainJustified + RangePhaseJustified) );
+            adjusted = adjusted && (rng->pJustData->getStatus() > 0); // fragt den gesamt status (gain,phase,offset)
         }
     }
 
@@ -2119,7 +2123,7 @@ const char* cWM3000iServer::mCmpCCoefficient(char*)
 }
 
 
-const char* cWM3000iServer::mSetStatus(char* s) {
+const char* cWM3000iServer::mSetGainStatus(char* s) {
     bool ok;
     QString par = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
     int st=par.toInt(&ok);
@@ -2129,7 +2133,7 @@ const char* cWM3000iServer::mSetStatus(char* s) {
 	    pCmdInterpreter->dedicatedList.pop_front();
 	    QString dedicatedRange = pCmdInterpreter->dedicatedList.first();
 	    sRange* ranges=SearchRange(dedicatedChannel,dedicatedRange);
-	    ranges->pJustData->setStatus(st);
+        ranges->pJustData->m_pGainCorrection->setStatus(st);
 	    Answer = ACKString; // acknowledge
 	}
 	else Answer = ERRAUTString; // nicht autorisiert
@@ -2139,14 +2143,80 @@ const char* cWM3000iServer::mSetStatus(char* s) {
 }
  
 
-const char* cWM3000iServer::mGetStatus() {
+const char* cWM3000iServer::mGetGainStatus() {
     QString dedicatedChannel = pCmdInterpreter->dedicatedList.first();
     pCmdInterpreter->dedicatedList.pop_front();
     QString dedicatedRange = pCmdInterpreter->dedicatedList.first();
     sRange* ranges=SearchRange(dedicatedChannel,dedicatedRange);
-    int st=ranges->pJustData->getStatus();
+    int st=ranges->pJustData->m_pGainCorrection->getStatus();
     Answer = QString::number(st);
-    return Answer.latin1();      
+    return Answer.latin1();
+}
+
+
+const char *cWM3000iServer::mSetPhaseStatus(char* s)
+{
+    bool ok;
+    QString par = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
+    int st=par.toInt(&ok);
+    if (ok) {
+    if ( EEPromAccessEnable() ) {
+        QString dedicatedChannel = pCmdInterpreter->dedicatedList.first();
+        pCmdInterpreter->dedicatedList.pop_front();
+        QString dedicatedRange = pCmdInterpreter->dedicatedList.first();
+        sRange* ranges=SearchRange(dedicatedChannel,dedicatedRange);
+        ranges->pJustData->m_pPhaseCorrection->setStatus(st);
+        Answer = ACKString; // acknowledge
+    }
+    else Answer = ERRAUTString; // nicht autorisiert
+    }
+    else Answer = ERRVALString; // error value
+    return Answer.latin1();
+}
+
+
+const char *cWM3000iServer::mGetPhaseStatus()
+{
+    QString dedicatedChannel = pCmdInterpreter->dedicatedList.first();
+    pCmdInterpreter->dedicatedList.pop_front();
+    QString dedicatedRange = pCmdInterpreter->dedicatedList.first();
+    sRange* ranges=SearchRange(dedicatedChannel,dedicatedRange);
+    int st=ranges->pJustData->m_pPhaseCorrection->getStatus();
+    Answer = QString::number(st);
+    return Answer.latin1();
+}
+
+
+const char *cWM3000iServer::mSetOffsetStatus(char* s)
+{
+    bool ok;
+    QString par = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
+    int st=par.toInt(&ok);
+    if (ok) {
+    if ( EEPromAccessEnable() ) {
+        QString dedicatedChannel = pCmdInterpreter->dedicatedList.first();
+        pCmdInterpreter->dedicatedList.pop_front();
+        QString dedicatedRange = pCmdInterpreter->dedicatedList.first();
+        sRange* ranges=SearchRange(dedicatedChannel,dedicatedRange);
+        ranges->pJustData->m_pOffsetCorrection->setStatus(st);
+        Answer = ACKString; // acknowledge
+    }
+    else Answer = ERRAUTString; // nicht autorisiert
+    }
+    else Answer = ERRVALString; // error value
+    return Answer.latin1();
+}
+
+
+const char *cWM3000iServer::mGetOffsetStatus()
+{
+    QString dedicatedChannel = pCmdInterpreter->dedicatedList.first();
+    pCmdInterpreter->dedicatedList.pop_front();
+    QString dedicatedRange = pCmdInterpreter->dedicatedList.first();
+    sRange* ranges=SearchRange(dedicatedChannel,dedicatedRange);
+    int st=ranges->pJustData->m_pOffsetCorrection->getStatus();
+    Answer = QString::number(st);
+    return Answer.latin1();
 }
 
 
@@ -2630,7 +2700,9 @@ const char* cWM3000iServer::SCPICmd( SCPICmdType cmd, char* s) {
     case 	SetCValueCCoefficient:	return mSetCValueCCoefficient(s);
     case 	SetCValueCNode:		return mSetCValueCNode(s);
     case	CmpCCoefficient:		return mCmpCCoefficient(s);
-    case   SetStatus:		return mSetStatus(s);	
+    case   SetGStatus:		return mSetGainStatus(s);
+    case   SetPStatus:		return mSetPhaseStatus(s);
+    case   SetOStatus:		return mSetOffsetStatus(s);
     case   SetRange:		return mSetRange(s);
     case   ChannelClose:		return mChannelClose(s);
     case 	ChannelOpen:		return mChannelOpen(s);
@@ -2666,7 +2738,9 @@ const char* cWM3000iServer::SCPIQuery( SCPICmdType cmd, char* s) {
     case 		GetCValueCCoefficientName: return mGetCValueCCoefficientName();
     case 		GetCValueCNode:		return mGetCValueCNode();	
     case 		GetCValueCNodeName:	return mGetCValueCNodeName();	
-    case 		GetStatus:		return mGetStatus();
+    case 		GetGStatus:		return mGetGainStatus();
+    case 		GetPStatus:		return mGetPhaseStatus();
+    case 		GetOStatus:		return mGetOffsetStatus();
     case 		GetCValue:		return mGetCValue(s);
     case 		GetRejection:		return mGetRejection();
     case 		GetRValue:		return mGetRValue();

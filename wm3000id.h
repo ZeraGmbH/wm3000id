@@ -203,8 +203,12 @@ private:
    const char* mGetRValue();
    const char* mGetRejection();
    const char* mGetCValue(char*); // abfrage des korrekturwertes (ev. mit parameter)
-   const char* mSetStatus( char*);
-   const char* mGetStatus();
+   const char* mSetGainStatus(char* s);
+   const char* mGetGainStatus();
+   const char* mSetPhaseStatus(char*s);
+   const char* mGetPhaseStatus();
+   const char* mSetOffsetStatus(char *s);
+   const char* mGetOffsetStatus();
    const char* mSetCValueCCoefficient( char* );
    const char* mGetCValueCCoefficient();
    const char* mGetCValueCCoefficientName();
