@@ -35,8 +35,10 @@ public:
     ~cJustData();
     void Serialize(QDataStream&); // zum schreiben der justagedaten in flashspeicher
     void Deserialize(QDataStream&); // reicht eine routine für koeffizienten und nodes 
+    QString SerializeStatus();
     QString SerializeCoefficients(); // fürs xml file halten wir das getrennt
     QString SerializeNodes();
+    void DeserializeStatus(const QString&);
     void DeserializeCoefficients(const QString&);
     void DeserializeNodes(const QString&);
     bool setNode(int index, cJustNode jn); // !!! setzen der stützstellen ist reihenfolge abhängig !!!
@@ -45,10 +47,14 @@ public:
     double getCoefficient(int index);
     bool cmpCoefficients(); // berechnet aus den stützstellen die koeffizienten
     double getCorrection(double arg); // berechnet den korrekturwert  c= ax^order +bx^order-1 ...
+    void setStatus(int stat);
+    int getStatus();
+
 private:
     double* m_pCoefficient; // es werden dyn. arrays[ordnung+1]  erzeugt
     cJustNode* m_pJustNode; // dito
     int m_nOrder; // wir merken uns die ordnung
+    int m_nStatus;
 };
 
 	

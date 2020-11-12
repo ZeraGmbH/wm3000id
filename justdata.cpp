@@ -57,6 +57,7 @@ cJustData::cJustData(int order,double init)
     m_pJustNode = new cJustNode[order+1]; 
     setNode(0 , cJustNode(init,0.0)); // setzt den 1. node und die folgenden 
     cmpCoefficients();
+    setStatus(0);
 }
 
 
@@ -70,6 +71,7 @@ cJustData::~cJustData()
 void cJustData::Serialize(QDataStream& qds) // zum schreiben der justagedaten in flashspeicher
 {
     int i;
+    qds << m_nStatus;
     for (i = 0; i < m_nOrder+1; i++)
 	qds << m_pCoefficient[i];
     for (i = 0; i < m_nOrder+1; i++)
@@ -80,13 +82,20 @@ void cJustData::Serialize(QDataStream& qds) // zum schreiben der justagedaten in
 void cJustData::Deserialize(QDataStream& qds) // lesen der justagedaten aus flashspeicher
 {
     int i;
+    qds >> m_nStatus;
     for (i = 0; i < m_nOrder+1; i++)
 	qds >> m_pCoefficient[i];
     for (i = 0; i < m_nOrder+1; i++)
 	m_pJustNode[i].Deserialize(qds);
 }
 	
+
+QString cJustData::SerializeStatus() // für xml file
+{
+    return QString("%1").arg(m_nStatus);
+}
 	
+
 QString cJustData::SerializeCoefficients() // fürs xml file halten wir das getrennt
 {
     int i;
@@ -105,6 +114,12 @@ QString cJustData::SerializeNodes()
 	s += m_pJustNode[i].Serialize();
     return s;
 }    
+
+
+void cJustData::DeserializeStatus(const QString& s)
+{
+    m_nStatus = s.toInt();
+}
 
 
 void cJustData::DeserializeCoefficients(const QString& s) 
@@ -215,7 +230,22 @@ double cJustData::getCorrection(double arg) // berechnet den korrekturwert
     }
     
     return Corr;
-}    
+}
+
+
+void cJustData::setStatus(int stat)
+{
+    if (stat == 0)
+        m_nStatus = stat;
+    else
+        m_nStatus = 1;
+}
+
+
+int cJustData::getStatus()
+{
+    return m_nStatus;
+}
     
 
 
