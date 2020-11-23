@@ -19,7 +19,11 @@ HEADERS	+= cmdinterpret.h \
 	wmjustdata.h \
 	wmscpi.h \
 	zeraglobal.h \
-	zhserver.h
+	zhserver.h \
+        wmjustdatabase.h \
+        wmjustdatav208.h \
+    justdatabase.h \
+    justdatav208.h
 
 SOURCES	+= cmdinterpret.cpp \
 	cmds.cpp \
@@ -34,7 +38,10 @@ SOURCES	+= cmdinterpret.cpp \
 	scpi.cpp \
 	wm3000id.cpp \
 	wmjustdata.cpp \
-	zhserver.cpp
+	zhserver.cpp \
+        wmjustdatav208.cpp \
+    justdatabase.cpp \
+    justdatav208.cpp
 
 # Input
 #The following line was inserted by qt3to4
