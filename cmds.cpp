@@ -38,6 +38,7 @@ cNodeSCPI* Calculate;
 			    cNodeZHServer* CalculateCNameRName;							          cNodeSCPI* CalculateCNameRNameRValue;
 				          cNodeSCPI* CalculateCNameRNameRejection;      
 				          cNodeZHServer* CalculateCNameRNameCValue;
+                          cNodeSCPI* CalculateCNameRNameStatus;
                           cNodeSCPI* CalculateCNameRNameGStatus;
                           cNodeSCPI* CalculateCNameRNamePStatus;
                           cNodeSCPI* CalculateCNameRNameOStatus;
@@ -155,7 +156,8 @@ cNode* InitCmdTree() {
     // die QStringList in CalculateCNameRNameCNode wird später in abhängigkeit von CalculateCName gesetzt
     CalculateCNameRNameCCoefficient=new cNodeZHServer(NULL,isQuery | isCommand,CalculateCNameRNameCNode,NULL,SetCValueCCoefficient,GetCValueCCoefficient);
     // die QStringList in CalculateCNameRNameCCoefficient wird später in abhängigkeit von CalculateCName gesetzt
-    CalculateCNameRNameGStatus=new cNodeSCPI("GSTATUS",isQuery | isCommand,CalculateCNameRNameCCoefficient,NULL,SetGStatus,GetGStatus);
+    CalculateCNameRNameStatus=new cNodeSCPI("STATUS",isQuery | isCommand,CalculateCNameRNameCCoefficient,NULL,SetStatus,GetStatus);
+    CalculateCNameRNameGStatus=new cNodeSCPI("GSTATUS",isQuery | isCommand,CalculateCNameRNameStatus,NULL,SetGStatus,GetGStatus);
     CalculateCNameRNamePStatus=new cNodeSCPI("PSTATUS",isQuery | isCommand,CalculateCNameRNameGStatus,NULL,SetPStatus,GetPStatus);
     CalculateCNameRNameOStatus=new cNodeSCPI("OSTATUS",isQuery | isCommand,CalculateCNameRNamePStatus,NULL,SetOStatus,GetOStatus);
     CalculateCNameRNameCValue=new cNodeZHServer(NULL,isQuery | isQuerywPar,CalculateCNameRNameOStatus,NULL,nixCmd,GetCValue);
