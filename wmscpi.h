@@ -48,6 +48,8 @@ enum SCPICmdType  {	nixCmd, // 0 is nix
 			GetRejection, // abfrage aussteuerung 100%
 			GetRValue, // abfrage bereichendwert
 			GetCValue, // abfrage der korrekturwerte
+            SetStatus, // setzen des alten status
+            GetStatus, // abfragen des alten status
             SetGStatus, // setzen gain status wort
             GetGStatus, // abfrage status wort
             SetPStatus, // setzen phase status wort
