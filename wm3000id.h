@@ -14,7 +14,7 @@
 #include <qdatetime.h>
 #include <qdom.h>
 
-
+#include "wmjustdatabase.h"
 #include "wmjustdata.h"
 #include "zhserver.h"
 #include "wmscpi.h"
@@ -44,6 +44,9 @@
 
 #define ch0_n 14 /* 14 bereiche für kanal 0 */
 #define ch1_n 24 /* 24 bereiche für kanal 1 */ 
+
+#define ch0_nV208 18 /* 18 bereiche für kanal 0  ab v2.08*/
+#define ch1_nV208 28 /* 28 bereiche für kanal 1  ab v2.08*/
 
 enum hw_cmdcode {	hwGetSerialNr = 0x0001,	hwGetDevName = 0x0002,
 			hwGetCtrlVersion = 0x0003,	hwGetLCAVersion = 0x0004,
@@ -114,7 +117,7 @@ struct sRange {
         char  RSelCode;                 // Range Selection Code (only for internal use)
         char RType;                     // Volt, Ampere.....
         char RSpec;                     // phsys, log, virt
-        cWMJustData* pJustData;         // Zeiger auf Justierdaten
+        cWMJustDataBase* pJustData;         // Zeiger auf Justierdaten
 };
 
 
@@ -187,6 +190,7 @@ private:
     const char* mGetDeviceVersion();
     const char* mGetServerVersion();  
   
+    bool getAdjustment();
     // die routinen für das status modell
     
     const char* mGetAdjustmentStatus();
@@ -199,8 +203,14 @@ private:
    const char* mGetRValue();
    const char* mGetRejection();
    const char* mGetCValue(char*); // abfrage des korrekturwertes (ev. mit parameter)
-   const char* mSetStatus( char*);
+   const char* mSetStatus(char* s);
    const char* mGetStatus();
+   const char* mSetGainStatus(char* s);
+   const char* mGetGainStatus();
+   const char* mSetPhaseStatus(char*s);
+   const char* mGetPhaseStatus();
+   const char* mSetOffsetStatus(char *s);
+   const char* mGetOffsetStatus();
    const char* mSetCValueCCoefficient( char* );
    const char* mGetCValueCCoefficient();
    const char* mGetCValueCCoefficientName();
@@ -243,8 +253,21 @@ private:
     int I2CBootloaderCommand(bl_cmd*);
     char* GenAdressPointerParameter(uchar adresspointerSize, ulong adr);
     
+    bool readJustFlash(QByteArray& jdata);
+    bool validJustData(QByteArray& jdata);
+    bool fetchJustData(QByteArray& jdata);
+    void fetchJustDataVersion(QByteArray& jdata);
+    bool jdvGreater(QString ver);
     bool ReadJustData();
+    void SetDeviceRanges();
+    bool ReadJustDataVersion();
+    void setDefaultADCJustData(); // wenn die adc's noch nicht korrigiert wurden -> dann tun wir das hier mit default werten
+
+    QString getFreqCode();
+    int  arraySizeCh0, arraySizeCh1;
+
     Q_UINT16 m_nChksumFlash;
+    QString m_sJustDataVersion; // die serverversion mit der die justagedaten geschrieben wurden
     
     QStringList CValueList; // fürs dekodieren liste aller bereitgestellten korrekturwerte 
     QStringList CCoeffientList; // dito für die koeffizienten
@@ -258,7 +281,8 @@ private:
     tChannelListMap ChannelCCoeffientListMap; // pro kanal eine liste mit korrekturkoeffizienten namen
     tChannelListMap ChannelCNodeListMap; // pro kanal eine liste mit stützstellen namen
     tChannelSockListMap ChannelSockListMap; // pro kanal eine liste der clients (sockets)  die ein open ausgeführt haben
-    QString sI2CDevNode; 
+    sRange dummy; // wir brauchen einen dummy kanal zum "absaugen" nicht gültiger justagedaten
+    QString sI2CDevNode;
     int I2CSlaveAdr;
     int I2CMasterAdr;
     int DebugLevel;
@@ -276,5 +300,6 @@ private:
     QString Answer;
     int m_nJDataStat;
     double SampleFrequency;
+    double SignalFrequency;
 };
 #endif

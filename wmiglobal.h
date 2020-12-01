@@ -25,6 +25,12 @@
 // des sigma delta wandlers angepass
 
 // V2.07 es wurde beim sample mode der mode 4 hinzugefügt (dc offset abgleich)
+// V2.08 die gain correction der adw's wird signalfrequenz abhängig durchgeführt und die koeffizienten dafür
+//       default angelegt. die ordnung der justage funktion für gain wurde erhöht damit der abgleich der adwandler
+//       über die frequenz funktioniert. die status information für die justage wurde vereinzelt, d.h. gain, phase und
+//       offset haben jetzt jeweils einen eigenen status eintrag. es wurden interface befehle eingeführt um den status
+//       für gain, phase, offset separat zu lesen bzw. zu schreiben. der xml export und import wurde geändert.
+
 
 #ifndef WMGOBAL_H
 #define WMGLOBAL_H
@@ -33,7 +39,7 @@
 #define CheckSumOffset 56
 #define LeiterkartenName "wm3000i"
 #define ServerBasisName "wm3000id"
-#define ServerVersion "V2.07"
+#define ServerVersion "V2.08"
 #define InpBufSize 4096
 #define atmelFlashfilePath "/opt/zera/bin/atmel.hex"
 #define atmelResetBit 16

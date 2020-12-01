@@ -48,8 +48,14 @@ enum SCPICmdType  {	nixCmd, // 0 is nix
 			GetRejection, // abfrage aussteuerung 100%
 			GetRValue, // abfrage bereichendwert
 			GetCValue, // abfrage der korrekturwerte
-			SetStatus, // setzen status wort
-			GetStatus, // abfrage status wort
+            SetStatus, // setzen des alten status
+            GetStatus, // abfragen des alten status
+            SetGStatus, // setzen gain status wort
+            GetGStatus, // abfrage status wort
+            SetPStatus, // setzen phase status wort
+            GetPStatus, // abfrage status wort
+            SetOStatus, // setzen offset status wort
+            GetOStatus, // abfrage status wort
 			SetCValueCCoefficient, //setzen korrektur koeffizienten
 			GetCValueCCoefficient, // abfrage korrektur koeffizienten
 			GetCValueCCoefficientName, // abfrgae der namen derselben
