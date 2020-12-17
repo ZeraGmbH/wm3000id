@@ -2406,7 +2406,11 @@ const char* cWM3000iServer::mGetCValue(char* s) // abfrage des korrekturwertes (
 
     if (jdvGreater("V2.07")) // wir haben andere adw bereich namen
     {
-        adwrange = QString("%1.50").arg(ads);
+        if (dedicatedsCValue == "CAMPLITUDE")
+            adwrange = QString("%1.%2").arg(ads).arg(getFreqCode());
+            // für amplitudenabgleich eine kurve aus einer kurvenschar weil das verhälnis von signalfrequenz zu abtastfrequenz relevant ist
+        else
+            adwrange = QString("%1.50").arg(ads); // für phasenabgleich die eine korrekturkurve über die frequenz
         rangeADW=SearchRange(dedicatedChannel, adwrange);
     }
     else
