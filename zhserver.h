@@ -10,7 +10,6 @@
 #define ZHSERVER_H
 
 #include <netinet/in.h>
-#include <q3ptrlist.h>
 #include <qstringlist.h>
 #include <qstring.h>
 #include "scpi.h"
@@ -48,14 +47,14 @@ private:
     QString sInput;
 };
 
-typedef Q3PtrList<cZHClient> ClientList;
+typedef QList<cZHClient*> ClientList;
 
 class cZHServer {
     
 public:
     cZHServer();
     cZHServer(cCmdInterpreter*);
-    virtual ~cZHServer(){};
+    virtual ~cZHServer();
     virtual int Execute(); // server ausführen
     QString& GetSoftwareVersion();
     virtual int SetServerNr(const char*); // setzen der device nr -> neuen server namen

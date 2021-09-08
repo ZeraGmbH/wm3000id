@@ -5,7 +5,6 @@
 #define JUSTDATA_H
 
 #include <qdatastream.h>
-#include <q3textstream.h>
 
 #include "justdatabase.h"
 

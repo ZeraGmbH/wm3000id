@@ -3,7 +3,7 @@
 
 #include <math.h>
 #include "justdata.h"
-#include "gaussmatrix.h"
+#include <gaussmatrix.h>
 
 
 

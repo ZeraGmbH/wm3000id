@@ -10,7 +10,6 @@
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qmap.h>
-#include <q3valuelist.h>
 #include <qdatetime.h>
 #include <qdom.h>
 
@@ -123,7 +122,7 @@ struct sRange {
 
 typedef QMap<QString,sRange*> tChannelRangeArrayMap; // zeigt für jeden kanal auf ein array v. sRange
 typedef QMap<QString,QStringList*> tChannelListMap; // zeigt für jeden kanal auf eine stringliste 
-typedef Q3ValueList<int> tSockList;
+typedef QList<int> tSockList;
 typedef QMap<QString,tSockList*> tChannelSockListMap;
  
 
@@ -266,7 +265,7 @@ private:
     QString getFreqCode();
     int  arraySizeCh0, arraySizeCh1;
 
-    Q_UINT16 m_nChksumFlash;
+    quint16 m_nChksumFlash;
     QString m_sJustDataVersion; // die serverversion mit der die justagedaten geschrieben wurden
     
     QStringList CValueList; // fürs dekodieren liste aller bereitgestellten korrekturwerte 

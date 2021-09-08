@@ -5,7 +5,8 @@
 
 #include <math.h>
 #include "justdata.h"
-#include "gaussmatrix.h"
+#include <gaussmatrix.h>
+#include <gaussnode.h>
 
 
 cJustNode::cJustNode(double corr, double arg)

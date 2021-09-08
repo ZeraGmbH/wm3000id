@@ -8,7 +8,7 @@
 bool cSCPIString::operator == (const QString& s) {
     QString tmp=*this; // mach einen qstring daraus
     QString atmp=ScpiAbreviation(tmp); // scpi konforme abkürzung davon
-    QString S=s.upper(); // das ganze in gross
+    QString S=s.toUpper(); // das ganze in gross
     bool b=( (tmp==s) || (tmp == S) || (atmp==s) || (atmp == S) );
     return (b);
 }
@@ -27,7 +27,7 @@ cSCPIString& cSCPIString::operator = (const char* s) {
 const QString cSCPIString::ScpiAbreviation (const QString& s) {
     if (s.length() <= 4) return s; // wenn lange kommando form <= 4 zeichen -> kurzes kommando = langes kommando
     QString t=s.left(4); // kurzes kommando ist erste 4 zeichen
-    if ( QString("AEIOU").contains(t.right(1),false) ) t=t.left(3); // ist das 4. zeichen ein vokal -> kurzes kommando ist erste 3 zeichen
+    if ( QString("AEIOU").contains(t.right(1),Qt::CaseInsensitive) ) t=t.left(3); // ist das 4. zeichen ein vokal -> kurzes kommando ist erste 3 zeichen
     return(t);
 }
     

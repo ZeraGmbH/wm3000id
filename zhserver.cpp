@@ -8,8 +8,6 @@
 #include <iostream>
 #include <qstring.h>
 #include <qstringlist.h>
-#include <q3valuelist.h>
-
 
 #include "wmiglobal.h"
 #include "zhserver.h"
@@ -95,7 +93,7 @@ void cZHClient::SetOutput(const char* s) {
 }
 
 char* cZHClient::GetOutput() {
-    return((char*)sOutput.latin1());
+    return((char*)sOutput.toLatin1().data());
 }
 
 bool cZHClient::OutpAvail() {
@@ -111,7 +109,7 @@ void cZHClient::AddInput(char* s) { // addiert einen teil string zum buffer
 }
 
 char* cZHClient::GetInput() { // gibt zeiger auf input
-    return((char*)sInput.latin1());
+    return((char*)sInput.toLatin1().data());
 }
 
 // hier jetzt die definitionen des eigenlichen server rumpfes
@@ -124,7 +122,6 @@ cZHServer::cZHServer() {
     sSoftwareVersion = ServerBasisName;
     sSoftwareVersion += " ";
     sSoftwareVersion += ServerVersion;
-    clientlist.setAutoDelete( TRUE ); // die liste hält die objekte
 }
 
 
@@ -133,6 +130,15 @@ cZHServer::cZHServer(cCmdInterpreter* ci) {
     pCmdInterpreter=ci;
 }
 
+cZHServer::~cZHServer()
+{
+    // We are the owners -> cleanup
+    for(auto entry : clientlist) {
+        delete(entry);
+    }
+}
+
+
 int cZHServer::Execute() { // server ausführen
     int sock;
     if ( (sock = socket( PF_INET, SOCK_STREAM, 0)) == -1) { //   socket holen
@@ -140,7 +146,7 @@ int cZHServer::Execute() { // server ausführen
 	return(1);
     }
     struct servent* se;
-    if ( (se=getservbyname( sServerName.latin1(),"tcp")) == NULL ) {  // holt port nr aus /etc/services
+    if ( (se=getservbyname( sServerName.toLatin1(),"tcp")) == NULL ) {  // holt port nr aus /etc/services
 	std::cout << "internet network services not found\n";
 	return(1);
     }
@@ -166,7 +172,7 @@ int cZHServer::Execute() { // server ausführen
 	
 	fdmax=sock; // start socket
 	FD_SET(sock,&rfds); 
-	if ( ! clientlist.isEmpty()) for ( cZHClient* client=clientlist.first(); client; client=clientlist.next() ) {
+    for ( auto client : clientlist ) {
 	    fd=client->sock;
 	    FD_SET(fd,&rfds); 
 	    if ( client->OutpAvail() ) 
@@ -185,7 +191,7 @@ int cZHServer::Execute() { // server ausführen
 	    }
 	}
 		
-	if ( ! clientlist.isEmpty()) for ( cZHClient* client=clientlist.first(); client; client=clientlist.next() ) {
+    for ( auto client : clientlist ) {
 	    fd=client->sock;
 	    if (FD_ISSET(fd,&rfds) ) { // sind daten für den client da, oder hat er sich abgemeldet ?
 		if ( (nBytes=recv(fd,InputBuffer,InpBufSize,0)) > 0  ) { // daten sind da
@@ -227,7 +233,7 @@ int cZHServer::Execute() { // server ausführen
 	    }
 	}
 	
-	if ( ! clientlist.isEmpty()) for ( cZHClient* client=clientlist.first(); client; client=clientlist.next() ) {
+    for ( auto client : clientlist ) {
 	    fd=client->sock;
 	    if (FD_ISSET(fd,&wfds) ) { // soll und kann was an den client gesendet werden ?
 		char* out=client->GetOutput();
@@ -261,12 +267,12 @@ void cZHServer::AddClient(int s, sockaddr_in* addr) { // fügt einen client hinz
 }
 
 void cZHServer::DelClient(int s) { // entfernt einen client
-    for ( cZHClient* client = clientlist.first(); client; client = clientlist.next() ) {
-	if ((client->sock) == s) {
-	    clientlist.remove(client);
-	    std::cout << "Client " << s << " deleted\n";
-	    break;
-	}
+    for (auto client: clientlist) {
+        if ((client->sock) == s) {
+            clientlist.removeOne(client);
+            std::cout << "Client " << s << " deleted\n";
+            break;
+        }
     }
 }
 

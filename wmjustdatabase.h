@@ -2,7 +2,6 @@
 #define WMJUSTDATABASE_H
 
 #include <qdatastream.h>
-#include <q3textstream.h>
 #include "justdata.h"
 
 

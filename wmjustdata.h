@@ -5,7 +5,6 @@
 
 
 #include <qdatastream.h>
-#include <q3textstream.h>
 #include "wmjustdatabase.h"
 #include "justdata.h"
 

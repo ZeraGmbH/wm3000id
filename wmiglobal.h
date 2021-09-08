@@ -33,7 +33,7 @@
 // V2.09 wm3000id.cpp: bugfix selecting the adw range for gain correction
 
 
-#ifndef WMGOBAL_H
+#ifndef WMGLOBAL_H
 #define WMGLOBAL_H
 
 #define FPGADeviceNode "/dev/zFPGA1reg"
