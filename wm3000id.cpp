@@ -289,7 +289,7 @@ int cWM3000iServer::I2CBootloaderCommand(bl_cmd* blc) {
     struct i2c_rdwr_ioctl_data comData = {  msgs: Msgs, nmsgs: 2 };
  
      if DEBUG2 syslog(LOG_INFO,"i2c write bootloader command %d bytes to i2cslave at 0x%x",blc->cmdlen,I2CSlaveAdr);
-     if (! I2CTransfer(sI2CDevNode,I2CSlaveAdr,DebugLevel,&comData)) { // wenn kein fehler
+     if (! I2CTransfer(sI2CDevNode,I2CSlaveAdr, &comData)) { // wenn kein fehler
      if (inpBuf[4] == cMaxim1WireCRC::CalcBlockCRC(inpBuf, 4) ) {
 	     rlen = (inpBuf[2] << 8) + inpBuf[3];
 	     blc->RM = (inpBuf[0] << 8) + inpBuf[1];
@@ -317,7 +317,7 @@ int cWM3000iServer::I2CWriteCommand(hw_cmd* hc) {
     struct i2c_rdwr_ioctl_data comData = {  msgs: Msgs, nmsgs: 2 };
  
      if DEBUG2 syslog(LOG_INFO,"i2c writecommand %d bytes to i2cslave at 0x%x",hc->cmdlen,I2CSlaveAdr);
-     if (! I2CTransfer(sI2CDevNode,I2CSlaveAdr,DebugLevel,&comData)) { // wenn kein fehler
+     if (! I2CTransfer(sI2CDevNode, I2CSlaveAdr, &comData)) { // wenn kein fehler
      if (inpBuf[4] == cMaxim1WireCRC::CalcBlockCRC(inpBuf, 4) ) {
 	     rlen = (inpBuf[2] << 8) + inpBuf[3];
 	     hc->RM = (inpBuf[0] << 8) + inpBuf[1];
@@ -341,7 +341,7 @@ int cWM3000iServer::I2CReadOutput(quint8* data, int dlen) {
     struct i2c_rdwr_ioctl_data comData = {  msgs: &Msgs, nmsgs: 1 };
  
      if DEBUG2 syslog(LOG_INFO,"i2c readoutput %d bytes from i2cslave at 0x%x",dlen+1,I2CSlaveAdr);
-     if (! I2CTransfer(sI2CDevNode,I2CSlaveAdress,DebugLevel,&comData)) { // wenn kein fehler
+     if (! I2CTransfer(sI2CDevNode,I2CSlaveAdress, &comData)) { // wenn kein fehler
      if (data[dlen-1] == cMaxim1WireCRC::CalcBlockCRC(data, dlen-1) )
 	     rlen = dlen;
      }
@@ -404,7 +404,7 @@ char* cWM3000iServer::GenAdressPointerParameter(uchar adresspointerSize, ulong a
 bool cWM3000iServer::readJustFlash(QByteArray &jdata)
 {
     QByteArray ba(6, 0); // byte array zur aufnahme länge und checksumme
-    cF24LC256* Flash=new cF24LC256(sI2CDevNode,DebugLevel,I2CEEPromAdress);
+    cF24LC256* Flash=new cF24LC256(sI2CDevNode, I2CEEPromAdress);
     if ( (6 - Flash->ReadData(ba.data(),6,0)) >0 )
     {
         if DEBUG1 syslog(LOG_ERR,"error reading flashmemory\n");
@@ -1385,7 +1385,7 @@ const char* cWM3000iServer::mJustData2EEProm(char* s) {
 	
     mem.close(); // wird nicht mehr benötigt
    
-    cF24LC256* Flash = new cF24LC256(sI2CDevNode,DebugLevel,I2CEEPromAdress);
+    cF24LC256* Flash = new cF24LC256(sI2CDevNode, I2CEEPromAdress);
     int written = Flash->WriteData(ba.data(),ba.size(),0);
     if ( (count - written) > 0) {
 	if DEBUG1 syslog(LOG_ERR,"error writing flashmemory\n");
