@@ -144,6 +144,77 @@ static sRange RangeCh1V208[ch1_nV208]=
                    { "E25mV"  , "0.025" ,"2995931" ,29,Volt, rngPhys,NULL}};
 
 
+static sRange RangeCh0V210[ch0_nV210]=
+                  {{"ADW80.16"  ,"ADW80.16"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW80.50"  ,"ADW80.50"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW80.60"  ,"ADW80.60"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+
+                   {"ADW256.16"  ,"ADW256.16"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW256.50"  ,"ADW256.50"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW256.60"  ,"ADW256.60"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+
+                   {"ADW96.50"  ,"ADW96.50"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW96.60"  ,"ADW96.60"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+
+                   {"ADW288.50"  ,"ADW288.50"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW240.60"  ,"ADW240.60"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+
+                   {"15.0A"   ,"15.0"  ,"3595118"  ,0 ,  Ampere, rngPhys, NULL},
+                   { "10.0A"  ,"10.0"  ,"4793490"  ,1 , Ampere, rngPhys,NULL},
+                   { "5.0A"    ,"5.0"    ,"4793490"  ,2 , Ampere, rngPhys,NULL},
+                   { "2.5A" ,"2.5"    ,"4793490"  ,3 , Ampere, rngPhys,NULL},
+                   { "1.0A"    ,"1.0"    ,"4793490"  ,4 , Ampere, rngPhys,NULL},
+                   { "500mA" ,"0.5"    ,"4793490"  ,5 , Ampere, rngPhys,NULL},
+                   { "250mA","0.25"  ,"4793490"  ,6 , Ampere, rngPhys,NULL},
+                   { "100mA"  ,"0.1"    ,"4793490"  ,7 , Ampere, rngPhys,NULL},
+                   { "50mA" ,"0.05" ,"4793490"  ,8 , Ampere, rngPhys,NULL},
+                   { "25mA" ,"0.025","4793490" ,9 , Ampere, rngPhys,NULL},
+                   { "10mA" ,"0.01"  ,"3834792" ,10 , Ampere, rngPhys,NULL},
+                   { "5mA"  ,"0.005"  ,"3834792" ,11 , Ampere, rngPhys,NULL}};
+
+
+static sRange RangeCh1V210[ch1_nV210]=
+                  {{"ADW80.16"  ,"ADW80.16"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW80.50"  ,"ADW80.50"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW80.60"  ,"ADW80.60"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+
+                   {"ADW256.16"  ,"ADW256.16"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW256.50"  ,"ADW256.50"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW256.60"  ,"ADW256.60"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+
+                   {"ADW96.50"  ,"ADW96.50"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW96.60"  ,"ADW96.60"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+
+                   {"ADW288.50"  ,"ADW288.50"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+                   {"ADW240.60"  ,"ADW240.60"   ,"500000"  ,255,  Volt , rngVirt, NULL},
+
+                   { "15.0A"   ,"15.0"  ,"3595118"  ,0 ,  Ampere, rngPhys, NULL},
+                   { "10.0A"  ,"10.0"  ,"4793490"  ,1 , Ampere, rngPhys,NULL},
+                   { "5.0A"    ,"5.0"    ,"4793490"  ,2 , Ampere, rngPhys,NULL},
+                   { "2.5A" ,"2.5"    ,"4793490"  ,3 , Ampere, rngPhys,NULL},
+                   { "1.0A"    ,"1.0"    ,"4793490"  ,4 , Ampere, rngPhys,NULL},
+                   { "500mA" ,"0.5"    ,"4793490"  ,5 , Ampere, rngPhys,NULL},
+                   { "250mA","0.25"  ,"4793490"  ,6 , Ampere, rngPhys,NULL},
+                   { "100mA"  ,"0.1"    ,"4793490"  ,7 , Ampere, rngPhys,NULL},
+                   { "50mA" ,"0.05" ,"4793490"  ,8 , Ampere, rngPhys,NULL},
+                   { "25mA" ,"0.025","4793490" ,9 , Ampere, rngPhys,NULL},
+                   { "10mA" ,"0.01"  ,"3834792" ,10 , Ampere, rngPhys,NULL},
+                   { "5mA"  ,"0.005"  ,"3834792" ,11 , Ampere, rngPhys,NULL},
+
+                   { "E15.0V"    , "15.0"   ,"2831155" ,20 , Volt, rngPhys,NULL},
+                   { "E10.0V"    , "10.0"   ,"4718592" ,21 , Volt, rngPhys,NULL},
+                   { "E5.0V"      ,"5.0"      ,"4718592" ,22,Volt, rngPhys,NULL},
+                   { "E2.5V"   ,"2.5"      ,"4718592" ,23,Volt, rngPhys,NULL},
+                   { "E1.0V"      , "1.0"     ,"4718592" ,24,Volt, rngPhys,NULL},
+                   { "E500mV", "0.5"     ,"2995931" ,25,Volt, rngPhys,NULL},
+                   { "E250mV", "0.25"   ,"2995931" ,26,Volt, rngPhys,NULL},
+                   { "E100mV", "0.1"     ,"2995931" ,27,Volt, rngPhys,NULL},
+                   { "E50mV"  , "0.05"   ,"2995931" ,28,Volt, rngPhys,NULL},
+                   { "E25mV"  , "0.025" ,"2995931" ,29,Volt, rngPhys,NULL}};
+
+
+
+
 QStringList MeasChannelList;
 
 cWM3000iServer::cWM3000iServer() 
@@ -206,17 +277,17 @@ cWM3000iServer::cWM3000iServer()
     {
         if (EEPromAccessEnable())
         {
-            if (jdvGreater("V2.07"))
+            if (jdvNewest())
             {
-                // die justage daten haben schon die neue version , also Bereiche setzen
+                // die justage daten haben schon die neueste version , also Bereiche setzen
                 // und daten lesen
                 SetDeviceRanges();
                 ReadJustData();
             }
             else
             {
-                // ist der justage stecker gesteckt, erzwingen wir die neue Version
-                // setzen die bereiche entsprechend, aber wir können die daten aber nicht mehr lesen
+                // ist der justage stecker gesteckt, erzwingen wir die neueste Version
+                // setzen die bereiche entsprechend, aber wir können die daten nicht mehr lesen
                 m_sJustDataVersion = ServerVersion;
                 SetDeviceRanges();
             }
@@ -231,7 +302,7 @@ cWM3000iServer::cWM3000iServer()
         }
     }
 
-    if (jdvGreater("V2.07")) // wenn es eine neuere version ist können wir in jedem fall die adc korrekturen
+    if (jdvGreater("V2.07")) // ab version 2.08 können wir in jedem fall die adc korrekturen
         setDefaultADCJustData(); // für die gain verstärkungen setzen weil die konstant bleiben
 
 }
@@ -245,6 +316,26 @@ int cWM3000iServer::sDebugLevel(char* s) {
 	return 0;
     }
     else return 1;
+}
+
+
+bool cWM3000iServer::isAllowedSamples(int n)
+{
+    bool ok;
+
+    ok = false;
+    switch (n)
+    {
+    case 80:
+    case 96:
+    case 240:
+    case 256:
+    case 288:
+            ok = true;
+            break;
+    }
+
+    return ok;
 }
 
 
@@ -596,6 +687,12 @@ bool cWM3000iServer::jdvGreater(QString ver)
 }
 
 
+bool cWM3000iServer::jdvNewest()
+{
+    return (m_sJustDataVersion == ServerVersion);
+}
+
+
 bool cWM3000iServer::ReadJustData()
 {
     QByteArray JustData;
@@ -616,6 +713,28 @@ void cWM3000iServer::SetDeviceRanges()
 {
     sRange* sr;
 
+
+    if (jdvGreater(QString("V2.09")))
+    {   // wenn wir neue justagedaten vorgefunden haben oder der justage stecker gesteckt ist
+        ChannelRangeArrayMap["ch0"] = &RangeCh0V210[0]; // alle sRange* / kanal
+        ChannelRangeArrayMap["ch1"] = &RangeCh1V210[0];
+        sr = ChannelRangeArrayMap["ch0"];
+        for (unsigned int i = 0; i<(sizeof(RangeCh0V210)/sizeof(sRange)); i++,sr++)
+        {
+            Ch0RangeList << sr->RName;
+            sr->pJustData=new cWMJustDataV208(); // default justage werte
+        }
+        sr = ChannelRangeArrayMap["ch1"];
+        for (unsigned int i = 0; i<(sizeof(RangeCh1V210)/sizeof(sRange)); i++,sr++)
+        {
+            Ch1RangeList << sr->RName;
+            sr->pJustData=new cWMJustDataV208(); // default justage werte
+        }
+        dummy.pJustData = new cWMJustDataV208();
+    }
+
+    else
+
     if (jdvGreater(QString("V2.07")))
     {   // wenn wir neue justagedaten vorgefunden haben oder der justage stecker gesteckt ist
         ChannelRangeArrayMap["ch0"] = &RangeCh0V208[0]; // alle sRange* / kanal
@@ -634,7 +753,9 @@ void cWM3000iServer::SetDeviceRanges()
         }
         dummy.pJustData = new cWMJustDataV208();
     }
+
     else
+
     {
         ChannelRangeArrayMap["ch0"] = &RangeCh0[0]; // alle sRange* / kanal
         ChannelRangeArrayMap["ch1"] = &RangeCh1[0];
@@ -680,28 +801,47 @@ void cWM3000iServer::setDefaultADCJustData()
     QHash<QString, QList<double> > corrNodeHash;
 
     QList<double> li8016;
-    li8016 << 0.999405 << 0.1 << 0.999983 << 16.66 << 1.000740 << 25.0;
+    li8016 << 0.999654 << 10.0 << 0.999698 << 20.0 << 0.999771 << 30.0;
     corrNodeHash["ADW80.16"] = li8016;
 
     QList<double> li8050;
-    li8050 << 0.999405 << 0.1 << 0.999784 << 40.0 << 1.0 << 50.0 << 1.000280 << 60.61;
+    li8050 << 0.999871 << 40.0 << 1.0 << 50.0 << 1.000155 << 60.0;
     corrNodeHash["ADW80.50"] = li8050;
 
     QList<double> li8060;
-    li8060 << 0.999405 << 0.1 << 0.999644 << 40.0 << 0.999789 << 50.0 << 1.000015 << 60.61;
+    li8060 << 1.0 << 50.0 << 1.000155 << 60.0 << 1.000540 << 80.0;
     corrNodeHash["ADW80.60"] = li8060;
 
     QList<double> li25616;
-    li25616 << 0.999405 << 0.1 << 0.999942 << 16.66 << 1.000605 << 25.0;
+    li25616 << 0.999662 << 10.0 << 0.999730 << 20.0 << 0.999844 << 30.0;
     corrNodeHash["ADW256.16"] = li25616;
 
     QList<double> li25650;
-    li25650 << 0.999405 << 0.1 << 0.999734 << 40.0 << 0.999958 << 50.0 << 1.000211 << 60.61;
+    li25650 << 1.0 << 40.0 << 1.000198 << 50.0 << 1.000435 << 60.0;
     corrNodeHash["ADW256.50"] = li25650;
 
     QList<double> li25660;
-    li25660 << 0.999405 << 0.1 << 0.999621 << 40.0 << 0.999770 << 50.0 << 0.999970 << 60.61;
+    li25660 << 1.000198 << 50.0 << 1.000435 << 60.0 << 1.001013 << 80.0;
     corrNodeHash["ADW256.60"] = li25660;
+
+    if (jdvGreater("V2.15"))
+    {
+        QList<double> li9650;
+        li9650 << 0.999801 << 40.0 << 0.999891 << 50.0 << 1.0 << 60.0;
+        corrNodeHash["ADW96.50"] = li9650;
+
+        QList<double> li9660;
+        li9660 << 0.999815 << 50.0 << 0.999891 << 60.0 << 1.000083 << 80.0;
+        corrNodeHash["ADW96.60"] = li9660;
+
+        QList<double> li28850;
+        li28850 << 0.999925 << 40.0 << 1.000083 << 50.0 << 1.000273 << 60.0;
+        corrNodeHash["ADW288.50"] = li28850;
+
+        QList<double> li24060;
+        li24060 << 1.000083 << 50.0 << 1.000273 << 60.0 << 1.000740 << 80.0;
+        corrNodeHash["ADW240.60"] = li24060;
+    }
 
     keyList = corrNodeHash.keys();
 
@@ -901,7 +1041,8 @@ const char* cWM3000iServer::mSetSyncSource(char* s) {
     QString par = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
     int so = par.toInt(&ok);
     
-    if ( (ok) && ((so == 0) || (so ==1)) ) {
+    if ( (ok) && ((so == 0) || (so ==1)) )
+    {
 	SyncSource = so;
 	Answer = mSetPPSSync(); 
     }
@@ -915,7 +1056,8 @@ const char* cWM3000iServer::mSetPSamples(char* s) {
     QString par = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
     int ps = par.toInt(&ok);
     
-    if ( (ok) && ((ps == 80) || (ps == 256)) ) {
+    if ( (ok) && (isAllowedSamples(ps)) )
+    {
 	char PSPAR[2];
 	PSPAR[0] = (ps >> 8) & 0xff;
 	PSPAR[1] = ps & 0xff;
@@ -925,8 +1067,10 @@ const char* cWM3000iServer::mSetPSamples(char* s) {
 	else
 	    Answer = ERREXECString; 
     }
-    else Answer = ERRVALString;
-    return Answer.latin1();        
+    else
+        Answer = ERRVALString;
+
+    return Answer.latin1();
 }	
  
 
@@ -2402,7 +2546,7 @@ const char* cWM3000iServer::mGetCValue(char* s) // abfrage des korrekturwertes (
     pCmdInterpreter->dedicatedList.pop_front();
     dedicatedsCValue = pCmdInterpreter->dedicatedList.first();
     samples = QString(mGetPSamples()).toInt();
-    ads = (samples == 80) ? "ADW80" : "ADW256";
+    ads = QString("ADW%1").arg(samples);
 
     if (jdvGreater("V2.07")) // wir haben andere adw bereich namen
     {
@@ -2410,7 +2554,12 @@ const char* cWM3000iServer::mGetCValue(char* s) // abfrage des korrekturwertes (
             adwrange = QString("%1.%2").arg(ads).arg(getFreqCode());
             // für amplitudenabgleich eine kurve aus einer kurvenschar weil das verhälnis von signalfrequenz zu abtastfrequenz relevant ist
         else
-            adwrange = QString("%1.50").arg(ads); // für phasenabgleich die eine korrekturkurve über die frequenz
+        {
+            if (ads == "ADW240")
+                adwrange = "ADW240.60"; // bei 240 samples gibt es keine 50Hz
+            else
+                adwrange = QString("%1.50").arg(ads); // für phasenabgleich die eine korrekturkurve über die frequenz
+        }
         rangeADW=SearchRange(dedicatedChannel, adwrange);
     }
     else

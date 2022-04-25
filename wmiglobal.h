@@ -31,6 +31,7 @@
 //       offset haben jetzt jeweils einen eigenen status eintrag. es wurden interface befehle eingeführt um den status
 //       für gain, phase, offset separat zu lesen bzw. zu schreiben. der xml export und import wurde geändert.
 // V2.09 wm3000id.cpp: bugfix selecting the adw range for gain correction
+// V2.10 es kommen neue sampleraten hinzu. es müssen in folge korrekturkurven für gain hinzugefügt werden.
 
 
 #ifndef WMGOBAL_H
@@ -40,7 +41,7 @@
 #define CheckSumOffset 56
 #define LeiterkartenName "wm3000i"
 #define ServerBasisName "wm3000id"
-#define ServerVersion "V2.09"
+#define ServerVersion "V2.10"
 #define InpBufSize 4096
 #define atmelFlashfilePath "/opt/zera/bin/atmel.hex"
 #define atmelResetBit 16

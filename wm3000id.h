@@ -48,6 +48,10 @@
 #define ch0_nV208 18 /* 18 bereiche für kanal 0  ab v2.08*/
 #define ch1_nV208 28 /* 28 bereiche für kanal 1  ab v2.08*/
 
+#define ch0_nV210 22 /* 22 bereiche für kanal 0  ab v2.10*/
+#define ch1_nV210 32 /* 32 bereiche für kanal 1  ab v2.10*/
+
+
 enum hw_cmdcode {	hwGetSerialNr = 0x0001,	hwGetDevName = 0x0002,
 			hwGetCtrlVersion = 0x0003,	hwGetLCAVersion = 0x0004,
 			hwGetPCBVersion = 0x0005,hwSetSerialNr = 0x0006,
@@ -146,6 +150,8 @@ public:
     static QStringList MeasChannelList; // liste aller messkanäle
     
 private:
+    bool isAllowedSamples(int n);
+
     // die routinen für das mmemory modell
     
     const char* mFile2Justdata( char*);	     	     
@@ -258,6 +264,7 @@ private:
     bool fetchJustData(QByteArray& jdata);
     void fetchJustDataVersion(QByteArray& jdata);
     bool jdvGreater(QString ver);
+    bool jdvNewest();
     bool ReadJustData();
     void SetDeviceRanges();
     bool ReadJustDataVersion();
