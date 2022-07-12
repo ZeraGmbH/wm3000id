@@ -11,7 +11,7 @@
 #include "wm3000id.h" // der eigentliche server
 
 
-extern QStringList cWM3000iServer::MeasChannelList; // liste aller messkanäle
+QStringList cWM3000iServer::MeasChannelList; // liste aller messkanäle
 
 // die vollständige kommando liste
 

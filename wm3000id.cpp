@@ -283,10 +283,11 @@ int cWM3000iServer::I2CBootloaderCommand(bl_cmd* blc) {
     quint8 inpBuf[5]; // die antwort auf command ist immer 5 bytes lang
   
     GenBootloaderCommand(blc);
-    struct i2c_msg Msgs[2] = { {addr :I2CSlaveAdr, flags: 0,len: blc->cmdlen, buf: blc->cmddata}, // 2 messages (tagged format )
-			  {addr :I2CSlaveAdr, flags: (I2C_M_RD+I2C_M_NOSTART), len: 5, buf: inpBuf} };   
+    struct i2c_msg Msgs[2] = {
+        {.addr = __u16(I2CSlaveAdr), .flags = 0, .len = __u16(blc->cmdlen), .buf = blc->cmddata}, // 2 messages (tagged format )
+        {.addr = __u16(I2CSlaveAdr), .flags = (I2C_M_RD+I2C_M_NOSTART), .len = 5, .buf = inpBuf} };
     
-    struct i2c_rdwr_ioctl_data comData = {  msgs: Msgs, nmsgs: 2 };
+    struct i2c_rdwr_ioctl_data comData = { .msgs = Msgs, .nmsgs = 2 };
  
      if DEBUG2 syslog(LOG_INFO,"i2c write bootloader command %d bytes to i2cslave at 0x%x",blc->cmdlen,I2CSlaveAdr);
      if (! I2CTransfer(sI2CDevNode,I2CSlaveAdr, &comData)) { // wenn kein fehler
@@ -311,10 +312,11 @@ int cWM3000iServer::I2CWriteCommand(hw_cmd* hc) {
     quint8 inpBuf[5]; // die antwort auf command ist immer 5 bytes lang
   
     GenCommand(hc);
-    struct i2c_msg Msgs[2] = { {addr :I2CSlaveAdr, flags: 0,len: hc->cmdlen, buf: hc->cmddata}, // 2 messages (tagged format )
-			  {addr :I2CSlaveAdr, flags: (I2C_M_RD+I2C_M_NOSTART), len: 5, buf: inpBuf} };   
+    struct i2c_msg Msgs[2] = {
+        {.addr = __u16(I2CSlaveAdr), .flags = 0, .len = __u16(hc->cmdlen), .buf = hc->cmddata}, // 2 messages (tagged format )
+        {.addr = __u16(I2CSlaveAdr), .flags = (I2C_M_RD+I2C_M_NOSTART), .len = 5, .buf = inpBuf} };
     
-    struct i2c_rdwr_ioctl_data comData = {  msgs: Msgs, nmsgs: 2 };
+    struct i2c_rdwr_ioctl_data comData = { .msgs = Msgs, .nmsgs = 2 };
  
      if DEBUG2 syslog(LOG_INFO,"i2c writecommand %d bytes to i2cslave at 0x%x",hc->cmdlen,I2CSlaveAdr);
      if (! I2CTransfer(sI2CDevNode, I2CSlaveAdr, &comData)) { // wenn kein fehler
@@ -337,8 +339,8 @@ int cWM3000iServer::I2CWriteCommand(hw_cmd* hc) {
 int cWM3000iServer::I2CReadOutput(quint8* data, int dlen) {
     int rlen = -1; // rückgabewert länge ; < 0 bedeutet fehler
     
-    struct i2c_msg Msgs = {addr :I2CSlaveAdr, flags: I2C_M_RD,len: dlen,buf: data}; // 1 message
-    struct i2c_rdwr_ioctl_data comData = {  msgs: &Msgs, nmsgs: 1 };
+    struct i2c_msg Msgs = {.addr = __u16(I2CSlaveAdr), .flags = I2C_M_RD, .len = __u16(dlen), .buf = data}; // 1 message
+    struct i2c_rdwr_ioctl_data comData = { .msgs = &Msgs, .nmsgs = 1 };
  
      if DEBUG2 syslog(LOG_INFO,"i2c readoutput %d bytes from i2cslave at 0x%x",dlen+1,I2CSlaveAdr);
      if (! I2CTransfer(sI2CDevNode,I2CSlaveAdress, &comData)) { // wenn kein fehler
@@ -874,7 +876,7 @@ const char* cWM3000iServer::mSetPPSSync() {
     char FPAR[4];
     for (int i = 0; i < 4; i++)
 	FPAR[i] = (PPSPar >> ((3-i)*8)) & 0xff;
-    hw_cmd CMD1 = { cmdcode: hwSetPPSSync, device: 0, par: FPAR, plen: 4,cmdlen: 0,cmddata: 0, RM:0 };
+    hw_cmd CMD1 = { .cmdcode = hwSetPPSSync, .device = 0, .par = FPAR, .plen = 4, .cmdlen = 0, .cmddata = 0, .RM = 0 };
     if ( (I2CWriteCommand(&CMD1) == 0) &&  (CMD1.RM == 0) ) 
 	return ACKString; // acknowledge
     else
@@ -919,7 +921,7 @@ const char* cWM3000iServer::mSetPSamples(char* s) {
 	char PSPAR[2];
 	PSPAR[0] = (ps >> 8) & 0xff;
 	PSPAR[1] = ps & 0xff;
-	hw_cmd CMD = { cmdcode: hwSetSRate, device: 0, par: PSPAR, plen: 2,cmdlen: 0,cmddata: 0, RM:0 };
+    hw_cmd CMD = { .cmdcode = hwSetSRate, .device = 0, .par = PSPAR, .plen = 2, .cmdlen = 0, .cmddata = 0, .RM = 0 };
 	if ( (I2CWriteCommand(&CMD) == 0) &&  (CMD.RM == 0) ) 
 	    Answer = ACKString; // acknowledge
 	else
@@ -940,7 +942,7 @@ const char *cWM3000iServer::mSetSenseAbsDiff(char * s)
     if ( (ok) && (sad > -1) && (sad< 2) ) {
     char PAR[1];
     PAR[0] = sad;
-    hw_cmd CMD = { cmdcode: hwSetSenseAbsDiff, device: 0, par: PAR, plen: 1,cmdlen: 0,cmddata: 0, RM:0 };
+    hw_cmd CMD = { .cmdcode = hwSetSenseAbsDiff, .device = 0, .par = PAR, .plen = 1, .cmdlen = 0, .cmddata = 0, .RM = 0 };
     if ((I2CWriteCommand(&CMD) == 0) &&  (CMD.RM == 0))
         Answer = ACKString; // acknowledge
     else
@@ -960,7 +962,7 @@ const char* cWM3000iServer::mSetSampleMode(char* s) {
     {
         char PAR[1];
         PAR[0] = sm;
-        hw_cmd CMD = { cmdcode: hwSetMode, device: 0, par: PAR, plen: 1,cmdlen: 0,cmddata: 0, RM:0 };
+        hw_cmd CMD = { .cmdcode = hwSetMode, .device = 0, .par = PAR, .plen = 1, .cmdlen = 0, .cmddata = 0, .RM = 0 };
         if ((I2CWriteCommand(&CMD) == 0) &&  (CMD.RM == 0))
             Answer = ACKString; // acknowledge
         else
@@ -984,7 +986,7 @@ const char* cWM3000iServer::mSetSampleFrequency(char* s) {
 	for (int i = 0; i < 4; i++)
 	    FPAR[i] = (fpar >> ((3-i)*8)) & 0xff;
 
-	hw_cmd CMD = { cmdcode: hwSetFrequency, device: 0, par: FPAR, plen: 4,cmdlen: 0,cmddata: 0, RM:0 };
+    hw_cmd CMD = { .cmdcode = hwSetFrequency, .device = 0, .par = FPAR, .plen = 4, .cmdlen = 0, .cmddata = 0, .RM = 0 };
 	if ( (I2CWriteCommand(&CMD) == 0) &&  (CMD.RM == 0) ) 
         Answer = ACKString; // acknowledge
 	else						   
@@ -1419,7 +1421,7 @@ const char* cWM3000iServer::mGetEEPrChksum() {
 
 const char* cWM3000iServer::mGetPSamples() {
     char PAR[1];
-    struct hw_cmd CMD = { cmdcode: hwGetSRate, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
+    struct hw_cmd CMD = { .cmdcode = hwGetSRate, .device = 0, .par = PAR, .plen = 0, .cmdlen = 0, .cmddata = 0, .RM = 0 };
     Answer = ERREXECString;
     if ( ( I2CWriteCommand(&CMD) == 3) && (CMD.RM == 0)) {
         quint8 answ[3];
@@ -1437,7 +1439,7 @@ const char* cWM3000iServer::mGetPSamples() {
 
 const char* cWM3000iServer::mGetSyncPeriod() {
     char PAR[1];
-    struct hw_cmd CMD = { cmdcode: hwGetPPSSync, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
+    struct hw_cmd CMD = { .cmdcode = hwGetPPSSync, .device = 0, .par = PAR, .plen = 0, .cmdlen = 0,.cmddata = 0, .RM = 0 };
     Answer = ERREXECString;
     if ( ( I2CWriteCommand(&CMD) == 5) && (CMD.RM == 0)) {
         quint8 answ[5];
@@ -1457,7 +1459,7 @@ const char* cWM3000iServer::mGetSyncPeriod() {
 
 const char* cWM3000iServer::mGetSyncSource() {
     char PAR[1];
-    struct hw_cmd CMD = { cmdcode: hwGetPPSSync, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
+    struct hw_cmd CMD = { .cmdcode = hwGetPPSSync, .device = 0, .par = PAR, .plen = 0,.cmdlen = 0, .cmddata = 0, .RM = 0 };
     Answer = ERREXECString;
     if ( ( I2CWriteCommand(&CMD) == 5) && (CMD.RM == 0)) {
         quint8 answ[5];
@@ -1474,7 +1476,7 @@ const char* cWM3000iServer::mGetSyncSource() {
 
 const char* cWM3000iServer::mGetSampleMode() {
     char PAR[1];
-    struct hw_cmd CMD = { cmdcode: hwGetMode, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
+    struct hw_cmd CMD = { .cmdcode = hwGetMode, .device = 0, .par = PAR, .plen = 0,.cmdlen = 0, .cmddata = 0, .RM = 0 };
     Answer = ERREXECString;
     if ( ( I2CWriteCommand(&CMD) == 2) && (CMD.RM == 0)) {
         quint8 answ[2];
@@ -1490,7 +1492,7 @@ const char* cWM3000iServer::mGetSampleMode() {
 
 const char* cWM3000iServer::mGetSampleFrequency() {
     char PAR[1];
-    struct hw_cmd CMD = { cmdcode: hwGetFrequency, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
+    struct hw_cmd CMD = { .cmdcode = hwGetFrequency, .device = 0, .par = PAR, .plen = 0,.cmdlen = 0, .cmddata = 0, .RM = 0 };
     if ( ( I2CWriteCommand(&CMD) == 5) && (CMD.RM == 0)) {
         quint8 answ[5];
 	if (I2CReadOutput(answ,5) == 5) {
@@ -1507,12 +1509,12 @@ const char* cWM3000iServer::mGetSampleFrequency() {
 
 
 const char* cWM3000iServer::mSetSerialNumber(char* s) {
-    QString spar = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando   
+    QString spar = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
     int lplen = spar.length();
     if ( (lplen<1) || (lplen>24) ) Answer = NACKString;
     else
     {
-    struct hw_cmd CMD = { cmdcode: hwSetSerialNr, device: 0, par: spar.toLatin1(), plen: lplen,cmdlen: 0,cmddata: 0, RM:0 };
+    struct hw_cmd CMD = { .cmdcode = hwSetSerialNr, .device = 0, .par = spar.toLatin1(), .plen = short(lplen), .cmdlen = 0, .cmddata = 0, .RM = 0 };
 	if ( (I2CWriteCommand(&CMD) == 0) && (CMD.RM == 0) )
 	    Answer = ACKString;
 	else
@@ -1533,7 +1535,7 @@ const char* cWM3000iServer::mControlerMemUpdate(bl_cmdcode blwriteCmd,char* s)
 	{
 	    int dlen;
 	    char PAR[1];
-	    struct bl_cmd blInfoCMD = {cmdcode: blReadInfo, par:  PAR, plen: 0, cmdlen: 0, cmddata: 0, RM:  0};
+        struct bl_cmd blInfoCMD = { .cmdcode = blReadInfo, .par = PAR, .plen = 0, .cmdlen = 0, .cmddata = 0, .RM = 0};
 	    dlen = I2CBootloaderCommand(&blInfoCMD);
 	    if ( (dlen > 5) && (blInfoCMD.RM == 0) ) // es müssen mindestens 6 zeichen sein
 	    { // 5 bytes rückmeldung und kein fehler
@@ -1558,12 +1560,12 @@ const char* cWM3000iServer::mControlerMemUpdate(bl_cmdcode blwriteCmd,char* s)
 			char* adrParameter;
 			int adrParLen = BootloaderInfo.AdressPointerSize;
 			adrParameter = GenAdressPointerParameter(adrParLen, MemAdress); 
-			struct bl_cmd blAdressCMD = {cmdcode: blWriteAddressPointer, par: adrParameter, plen: adrParLen, cmdlen: 0, cmddata: 0, RM: 0};
+            struct bl_cmd blAdressCMD = {.cmdcode = blWriteAddressPointer, .par = adrParameter, .plen = short(adrParLen), .cmdlen = 0, .cmddata = 0, .RM =  0};
 			if ( (I2CBootloaderCommand(&blAdressCMD) == 0) && (blAdressCMD.RM == 0) )
 			{ // wir sind die adresse los geworden
 			    char* memdat = MemByteArray.data();
 			    short memlen = MemByteArray.count();
-			    struct bl_cmd blwriteMemCMD = {cmdcode: blwriteCmd, par: memdat, plen: memlen, cmdlen: 0, cmddata: 0, RM: 0};
+                struct bl_cmd blwriteMemCMD = {.cmdcode = blwriteCmd, .par = memdat, .plen = memlen, .cmdlen = 0, .cmddata = 0, .RM = 0};
 			    if ( (I2CBootloaderCommand(&blwriteMemCMD) == 0) && (blwriteMemCMD.RM == 0) )
 			    { // wir sind die daten los geworden und unterstellen dass die daten im flash sind wenn sie über die i2c schnittstelle korrekt übertragen wurden
 				MemAdress += BootloaderInfo.MemPageSize;
@@ -1632,7 +1634,7 @@ const char* cWM3000iServer::mControlerStartBootloader(char* s)
     }
      
      char PAR[1];
-     struct hw_cmd CMD = { cmdcode: hwStartBootloader, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
+     struct hw_cmd CMD = { .cmdcode = hwStartBootloader, .device = 0, .par = PAR, .plen = 0, .cmdlen = 0, .cmddata = 0, .RM = 0 };
      if ( (I2CWriteCommand(&CMD) == 0) && (CMD.RM == 0) ) // bootloader gestartet ...
 	 Answer = ACKString;
      else
@@ -1650,7 +1652,7 @@ const char* cWM3000iServer::mControlerStartProgram(char* s)
     }
  
     char PAR[1];
-    struct bl_cmd blStartProgramCMD = {cmdcode: blStartProgram, par:  PAR, plen: 0, cmdlen: 0, cmddata: 0, RM:  0};
+    struct bl_cmd blStartProgramCMD = {.cmdcode = blStartProgram, .par = PAR, .plen = 0, .cmdlen = 0, .cmddata = 0, .RM = 0};
     if ( (I2CBootloaderCommand(&blStartProgramCMD) != 0) || (blStartProgramCMD.RM) )	
     	Answer = ERREXECString;
     else
@@ -1663,7 +1665,7 @@ const char* cWM3000iServer::mControlerStartProgram(char* s)
 const char* cWM3000iServer::mGetText(hw_cmdcode hwcmd) {
         char PAR[1];
         int rlen;
-        struct hw_cmd CMD = { cmdcode: hwcmd, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
+        struct hw_cmd CMD = { .cmdcode = hwcmd, .device = 0, .par = PAR, .plen = 0, .cmdlen = 0, .cmddata = 0, .RM = 0 };
                               if ( ( (rlen = I2CWriteCommand(&CMD)) > 0) && (CMD.RM == 0)) {
                 quint8 answ[rlen];
                 if (I2CReadOutput(answ,rlen) == rlen) {
@@ -1687,7 +1689,7 @@ const char* cWM3000iServer::mSetPCBVersion(char* s) {
     if ( (slen<1) || (slen>24) ) Answer = NACKString;
     else
     {
-    struct hw_cmd CMD = { cmdcode: hwSetPCBVersion, device: 0, par: spar.toLatin1(), plen: slen,cmdlen: 0,cmddata: 0, RM:0 };
+    struct hw_cmd CMD = { .cmdcode = hwSetPCBVersion, .device = 0, .par = spar.toLatin1(), .plen = short(slen), .cmdlen = 0, .cmddata = 0, .RM = 0 };
 	if ( (I2CWriteCommand(&CMD) == 0) && (CMD.RM == 0) )
 	    Answer = ACKString;
 	else
@@ -1886,7 +1888,7 @@ const char* cWM3000iServer::mGetCValueCNodeName() {
 
 bool cWM3000iServer::EEPromAccessEnable() { 
     char PAR[1];
-    struct hw_cmd CMD = { cmdcode: hwGetFlashWriteAccess, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
+    struct hw_cmd CMD = { .cmdcode = hwGetFlashWriteAccess, .device = 0, .par = PAR, .plen = 0, .cmdlen = 0, .cmddata = 0, .RM = 0 };
     if ( (I2CWriteCommand(&CMD) == 2) && (CMD.RM == 0)) {
         quint8 answ[2];
 	return ( (I2CReadOutput(answ,2) == 2) && (answ[0]) );
@@ -1918,7 +1920,7 @@ bool cWM3000iServer::isAtmelRunning()
             {
                 r = read(fd,(char*) &pcbTestReg,4);
                 close(fd);
-                if (DEBUG1)  syslog(LOG_ERR,"reading fpga adr 0xffc =  %d\n", pcbTestReg);
+                if (DEBUG1)  syslog(LOG_ERR,"reading fpga adr 0xffc =  %lu\n", pcbTestReg);
                 if (r < 0 )
                 {
                     if (DEBUG1)  syslog(LOG_ERR,"error reading fpga device: %s\n",qPrintable(m_sFPGADeviceNode));
@@ -1977,7 +1979,7 @@ bool cWM3000iServer::programAtmelFlash()
         }
 
         r = read(fd,(char*) &pcbTestReg,4);
-        syslog(LOG_ERR,"reading fpga adr 0xffc =  %x\n", pcbTestReg);
+        syslog(LOG_ERR,"reading fpga adr 0xffc =  %lx\n", pcbTestReg);
         if (r < 0 )
         {
             if (DEBUG1)  syslog(LOG_ERR,"error reading fpga device: %s\n", qPrintable(m_sFPGADeviceNode));
@@ -1986,7 +1988,7 @@ bool cWM3000iServer::programAtmelFlash()
         }
 
         pcbTestReg |=  1 << (atmelResetBit-1); // set bit for atmel reset
-        syslog(LOG_INFO,"writing fpga adr 0xffc =  %x\n", pcbTestReg);
+        syslog(LOG_INFO,"writing fpga adr 0xffc =  %lx\n", pcbTestReg);
         r = write(fd, (char*) &pcbTestReg,4);
 
         if (r < 0 )
@@ -1999,7 +2001,7 @@ bool cWM3000iServer::programAtmelFlash()
         usleep(100); // give atmel some time for reset
 
         pcbTestReg &=  ~(1 << (atmelResetBit-1)); // reset bit for atmel reset
-        syslog(LOG_INFO,"writing fpga adr 0xffc =  %x\n", pcbTestReg);
+        syslog(LOG_INFO,"writing fpga adr 0xffc =  %lx\n", pcbTestReg);
         r = write(fd, (char*) &pcbTestReg,4);
         close(fd);
 
@@ -2508,7 +2510,7 @@ const char* cWM3000iServer::mResetStatOVL(char* s) {
     else
     {
 	char PAR[2]  = {0,1};
-	struct hw_cmd CMD = { cmdcode: hwResetCritStat, device: 0, par: PAR, plen: 2,cmdlen: 0,cmddata: 0, RM:0 };
+    struct hw_cmd CMD = { .cmdcode = hwResetCritStat, .device = 0, .par = PAR, .plen = 2, .cmdlen = 0, .cmddata = 0, .RM = 0 };
 	if ( !( (I2CWriteCommand(&CMD) == 0) && (CMD.RM == 0)) ) 
 	    Answer = ERREXECString; // error execution
 	else
@@ -2526,7 +2528,7 @@ const char* cWM3000iServer::mSetProtection(char* s) {
     if ( (ok) && (prot > -1) && (prot < 2) ) {
 	char PAR[1];
 	PAR[0] = prot;
-	hw_cmd CMD = { cmdcode: hwSetSenseProt, device: 0, par: PAR, plen: 1,cmdlen: 0,cmddata: 0, RM:0 };
+    hw_cmd CMD = { .cmdcode = hwSetSenseProt, .device = 0, .par = PAR, .plen = 1, .cmdlen = 0, .cmddata = 0, .RM = 0 };
 	if ((I2CWriteCommand(&CMD) == 0) &&  (CMD.RM == 0)) 
 	    Answer = ACKString; // acknowledge
 	else
@@ -2540,7 +2542,7 @@ const char* cWM3000iServer::mSetProtection(char* s) {
 const char* cWM3000iServer::mGetStatOVL() {
     char PAR[1];
     int rlen;
-    struct hw_cmd CMD = { cmdcode: hwGetCritStat, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
+    struct hw_cmd CMD = { .cmdcode = hwGetCritStat, .device = 0, .par = PAR, .plen = 0, .cmdlen = 0, .cmddata = 0, .RM = 0 };
     quint8 answ[3];
  
     if ( !( ( (rlen = I2CWriteCommand(&CMD)) == 3) && (CMD.RM == 0) && (I2CReadOutput(answ,rlen) == rlen)) ) {
@@ -2560,7 +2562,7 @@ const char* cWM3000iServer::mGetStatOVL() {
 const char* cWM3000iServer::mGetProtection() {
     char PAR[1];
     int rlen;
-    struct hw_cmd CMD = { cmdcode: hwGetSenseProt, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
+    struct hw_cmd CMD = { .cmdcode = hwGetSenseProt, .device = 0, .par = PAR, .plen = 0, .cmdlen = 0, .cmddata = 0, .RM = 0 };
     quint8 answ[2];
  
     if ( !( ( (rlen = I2CWriteCommand(&CMD)) == 2) && (CMD.RM == 0) && (I2CReadOutput(answ,rlen) == rlen)) ) {
@@ -2593,7 +2595,7 @@ const char* cWM3000iServer::mGetRange() {
     char dnr = (dedicatedChannel == "ch0") ? 1 : 2;
     char PAR[1];
     int rlen;
-    struct hw_cmd CMD = { cmdcode: hwGetRange, device: dnr, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
+    struct hw_cmd CMD = { .cmdcode = hwGetRange, .device = dnr, .par = PAR, .plen = 0, .cmdlen = 0, .cmddata = 0, .RM = 0 };
     quint8 answ[2];
     
     if ( !( ( (rlen = I2CWriteCommand(&CMD)) == 2) && (CMD.RM == 0) && (I2CReadOutput(answ,rlen) == rlen)) ) {
@@ -2653,7 +2655,7 @@ const char* cWM3000iServer::mSetRange(char* s) {
     
     char PAR[1];
     PAR[0] = sr->RSelCode;
-    struct hw_cmd CMD = { cmdcode: hwSetRange, device: dnr, par: PAR, plen: 1,cmdlen: 0,cmddata: 0, RM:0 };
+    struct hw_cmd CMD = { .cmdcode = hwSetRange, .device = dnr, .par = PAR, .plen = 1, .cmdlen = 0, .cmddata = 0, .RM = 0 };
     if ( !( (I2CWriteCommand(&CMD) == 0) && (CMD.RM == 0)) ) 
 	Answer = ERREXECString; // error execution
     else
