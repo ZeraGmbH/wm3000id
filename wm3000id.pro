@@ -43,8 +43,9 @@ SOURCES	+= cmdinterpret.cpp \
     justdatabase.cpp \
     justdatav208.cpp
 
-# Input
-#The following line was inserted by qt3to4
+# avoid warnings/error on modern environments
+QMAKE_CXXFLAGS += -Wno-deprecated-copy -Wno-narrowing
+
 QT += xml  qt3support 
 
 target.path = /usr/bin
