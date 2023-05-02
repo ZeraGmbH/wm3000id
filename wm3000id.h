@@ -38,7 +38,6 @@
 */
 
 #define MaxDebugLevel 7
-#define DEBUG1 (DebugLevel & 1) // alle fehlermeldungen loggen
 #define DEBUG2 (DebugLevel & 2) // alle i2c aktivitäten loggen
 #define DEBUG3 (DebugLevel & 4) // alle client an-,abmeldungen
 

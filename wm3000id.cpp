@@ -369,79 +369,82 @@ int cWM3000iServer::SetI2CMasterAdr(char* s) {
 }
 
 
-int cWM3000iServer::I2CBootloaderCommand(bl_cmd* blc) {
+int cWM3000iServer::I2CBootloaderCommand(bl_cmd* blc)
+{
     int rlen = -1; // rückgabewert länge ; < 0 bedeutet fehler
     quint8 inpBuf[5]; // die antwort auf command ist immer 5 bytes lang
-  
+
     GenBootloaderCommand(blc);
-    struct i2c_msg Msgs[2] = { {addr :I2CSlaveAdr, flags: 0,len: blc->cmdlen, buf: blc->cmddata}, // 2 messages (tagged format )
-			  {addr :I2CSlaveAdr, flags: (I2C_M_RD+I2C_M_NOSTART), len: 5, buf: inpBuf} };   
-    
+    struct i2c_msg Msgs[2] = {
+        {addr :I2CSlaveAdr, flags: 0,len: blc->cmdlen, buf: blc->cmddata}, // 2 messages (tagged format )
+        {addr :I2CSlaveAdr, flags: (I2C_M_RD+I2C_M_NOSTART), len: 5, buf: inpBuf}
+    };
     struct i2c_rdwr_ioctl_data comData = {  msgs: Msgs, nmsgs: 2 };
- 
-     if DEBUG2 syslog(LOG_INFO,"i2c write bootloader command %d bytes to i2cslave at 0x%x",blc->cmdlen,I2CSlaveAdr);
-     if (! I2CTransfer(sI2CDevNode,I2CSlaveAdr,DebugLevel,&comData)) { // wenn kein fehler
-	 if (inpBuf[4] == CalcBlockCRC(inpBuf, 4) ) { 
-	     rlen = (inpBuf[2] << 8) + inpBuf[3];
-	     blc->RM = (inpBuf[0] << 8) + inpBuf[1];
-	     if (blc->RM)
-		 if DEBUG1 syslog(LOG_ERR,"i2ctransfer error 0x%x with i2cslave at 0x%x failed",blc->RM,I2CSlaveAdr);
-	 }
-     }
-     else
-     {
-	 if DEBUG1 syslog(LOG_ERR,"i2ctransfer to i2cslave at 0x%x failed",I2CSlaveAdr);
-     }
-     delete blc->cmddata;
-     return rlen; // -1 wenn fehler ; sonst länge des erzeugten output
- }
+
+    if DEBUG2
+        syslog(LOG_INFO,"i2c write bootloader command %d bytes to i2cslave at 0x%x",blc->cmdlen,I2CSlaveAdr);
+    if (!I2CTransfer(sI2CDevNode,I2CSlaveAdr,DebugLevel,&comData)) { // wenn kein fehler
+        if (inpBuf[4] == CalcBlockCRC(inpBuf, 4) ) {
+            rlen = (inpBuf[2] << 8) + inpBuf[3];
+            blc->RM = (inpBuf[0] << 8) + inpBuf[1];
+            if (blc->RM)
+                syslog(LOG_ERR,"i2ctransfer error 0x%x with i2cslave at 0x%x failed",blc->RM,I2CSlaveAdr);
+        }
+    }
+    else
+        syslog(LOG_ERR,"i2ctransfer to i2cslave at 0x%x failed",I2CSlaveAdr);
+    delete blc->cmddata;
+    return rlen; // -1 wenn fehler ; sonst länge des erzeugten output
+}
 
 
-int cWM3000iServer::I2CWriteCommand(hw_cmd* hc) {
+int cWM3000iServer::I2CWriteCommand(hw_cmd* hc)
+{
     int rlen = -1; // rückgabewert länge ; < 0 bedeutet fehler
     quint8 inpBuf[5]; // die antwort auf command ist immer 5 bytes lang
-  
+
     GenCommand(hc);
-    struct i2c_msg Msgs[2] = { {addr :I2CSlaveAdr, flags: 0,len: hc->cmdlen, buf: hc->cmddata}, // 2 messages (tagged format )
-			  {addr :I2CSlaveAdr, flags: (I2C_M_RD+I2C_M_NOSTART), len: 5, buf: inpBuf} };   
-    
+    struct i2c_msg Msgs[2] = {
+        {addr :I2CSlaveAdr, flags: 0,len: hc->cmdlen, buf: hc->cmddata}, // 2 messages (tagged format )
+        {addr :I2CSlaveAdr, flags: (I2C_M_RD+I2C_M_NOSTART), len: 5, buf: inpBuf}
+    };
+
     struct i2c_rdwr_ioctl_data comData = {  msgs: Msgs, nmsgs: 2 };
- 
-     if DEBUG2 syslog(LOG_INFO,"i2c writecommand %d bytes to i2cslave at 0x%x",hc->cmdlen,I2CSlaveAdr);
-     if (! I2CTransfer(sI2CDevNode,I2CSlaveAdr,DebugLevel,&comData)) { // wenn kein fehler
-	 if (inpBuf[4] == CalcBlockCRC(inpBuf, 4) ) { 
-	     rlen = (inpBuf[2] << 8) + inpBuf[3];
-	     hc->RM = (inpBuf[0] << 8) + inpBuf[1];
-	     if (hc->RM)
-		 if DEBUG1 syslog(LOG_ERR,"i2ctransfer error 0x%x with i2cslave at 0x%x failed",hc->RM,I2CSlaveAdr);
-	 }
+
+    if DEBUG2
+        syslog(LOG_INFO,"i2c writecommand %d bytes to i2cslave at 0x%x",hc->cmdlen,I2CSlaveAdr);
+    if (!I2CTransfer(sI2CDevNode,I2CSlaveAdr,DebugLevel,&comData)) { // wenn kein fehler
+        if (inpBuf[4] == CalcBlockCRC(inpBuf, 4) ) {
+            rlen = (inpBuf[2] << 8) + inpBuf[3];
+            hc->RM = (inpBuf[0] << 8) + inpBuf[1];
+            if (hc->RM)
+                syslog(LOG_ERR,"i2ctransfer error 0x%x with i2cslave at 0x%x failed", hc->RM,I2CSlaveAdr);
+        }
      }
      else
-     {
-	 if DEBUG1 syslog(LOG_ERR,"i2ctransfer to i2cslave at 0x%x failed",I2CSlaveAdr);
-     }
+        syslog(LOG_ERR,"i2ctransfer to i2cslave at 0x%x failed",I2CSlaveAdr);
      delete hc->cmddata;
      return rlen; // -1 wenn fehler ; sonst länge des erzeugten output
  }
 
 
-int cWM3000iServer::I2CReadOutput(quint8* data, int dlen) {
+int cWM3000iServer::I2CReadOutput(quint8* data, int dlen)
+{
     int rlen = -1; // rückgabewert länge ; < 0 bedeutet fehler
-    
+
     struct i2c_msg Msgs = {addr :I2CSlaveAdr, flags: I2C_M_RD,len: dlen,buf: data}; // 1 message
     struct i2c_rdwr_ioctl_data comData = {  msgs: &Msgs, nmsgs: 1 };
- 
-     if DEBUG2 syslog(LOG_INFO,"i2c readoutput %d bytes from i2cslave at 0x%x",dlen+1,I2CSlaveAdr);
-     if (! I2CTransfer(sI2CDevNode,I2CSlaveAdress,DebugLevel,&comData)) { // wenn kein fehler
-	 if (data[dlen-1] == CalcBlockCRC(data, dlen-1) )
-	     rlen = dlen;
-     }
-     else
-     {
-	 if DEBUG1 syslog(LOG_ERR,"i2ctransfer to i2cslave at 0x%x failed",I2CSlaveAdr);
-     }
-     return rlen; // -1 wenn fehler ; sonst die gelesenen zeichen
- }
+
+    if DEBUG2
+        syslog(LOG_INFO,"i2c readoutput %d bytes from i2cslave at 0x%x",dlen+1,I2CSlaveAdr);
+    if (! I2CTransfer(sI2CDevNode,I2CSlaveAdress,DebugLevel,&comData)) { // wenn kein fehler
+        if (data[dlen-1] == CalcBlockCRC(data, dlen-1) )
+            rlen = dlen;
+    }
+    else
+        syslog(LOG_ERR,"i2ctransfer to i2cslave at 0x%x failed",I2CSlaveAdr);
+    return rlen; // -1 wenn fehler ; sonst die gelesenen zeichen
+}
 
 
 void  cWM3000iServer::GenCommand(hw_cmd* hc) {
@@ -487,7 +490,7 @@ char* cWM3000iServer::GenAdressPointerParameter(uchar adresspointerSize, ulong a
     char* par = new char(adresspointerSize);
     char* pptr = par;
     for (int  i = 0; i < adresspointerSize; i++)
-	*pptr++ = (char) ((adr >> (8* ( (adresspointerSize-1) - i)) ) & 0xff);
+        *pptr++ = (char) ((adr >> (8* ( (adresspointerSize-1) - i)) ) & 0xff);
     return par;
 }
 
@@ -496,9 +499,8 @@ bool cWM3000iServer::readJustFlash(QByteArray &jdata)
 {
     QByteArray ba(6); // byte array zur aufnahme länge und checksumme
     c24LC256* Flash=new c24LC256(sI2CDevNode,DebugLevel,I2CEEPromAdress);
-    if ( (6 - Flash->ReadData(ba.data(),6,0)) >0 )
-    {
-        if DEBUG1 syslog(LOG_ERR,"error reading flashmemory\n");
+    if ( (6 - Flash->ReadData(ba.data(),6,0)) >0 ) {
+        syslog(LOG_ERR,"error reading flashmemory\n");
         delete Flash;
         return(false); // lesefehler
     }
@@ -507,22 +509,19 @@ bool cWM3000iServer::readJustFlash(QByteArray &jdata)
     uint count;
 
     bastream >> count >> m_nChksumFlash; // länge der flashdaten u. checksumme
-    if ( count > (uint)Flash->size() )
-    {
-        if DEBUG1 syslog(LOG_ERR,"error reading flashmemory, count > flash\n");
+    if ( count > (uint)Flash->size() ) {
+        syslog(LOG_ERR,"error reading flashmemory, count > flash\n");
         delete Flash;
         return(false); // lesefehler
     }
 
     jdata.resize(count); // byte array zur aufnahme der gesamten daten
 
-    if ( (count - Flash->ReadData(jdata.data(),count,0)) >0 )
-    {
-        if DEBUG1 syslog(LOG_ERR,"error reading flashmemory\n");
+    if ( (count - Flash->ReadData(jdata.data(),count,0)) >0 ) {
+        syslog(LOG_ERR,"error reading flashmemory\n");
         delete Flash;
         return(false); // lesefehler
     }
-
     return true;
 }
 
@@ -546,9 +545,8 @@ bool cWM3000iServer::validJustData(QByteArray &jdata)
     mem.writeBlock(ca); // 0 setzen der checksumme
 
     chksumCMP = qChecksum(jdata.data(),jdata.size());
-    if (chksumCMP != m_nChksumFlash)
-    {
-        if DEBUG1 syslog(LOG_ERR,"invalid checksum encountered reading flashmemory\n");
+    if (chksumCMP != m_nChksumFlash) {
+        syslog(LOG_ERR,"invalid checksum encountered reading flashmemory\n");
         return(false); // daten fehlerhaft
     }
 
@@ -569,8 +567,7 @@ bool cWM3000iServer::fetchJustData(QByteArray &jdata)
     bastream >> s;
 
     // ab version v1.02 version testen
-    if (QString(s) == "ServerVersion")
-    {
+    if (QString(s) == "ServerVersion") {
         bastream >> s;
         m_sJustDataVersion = QString(s);
         bastream >> s; // jetzt steht in s auch für die neue version der leiterplatten name
@@ -578,18 +575,15 @@ bool cWM3000iServer::fetchJustData(QByteArray &jdata)
     else
         m_sJustDataVersion = "V0.00"; // dann ist es eine alte version
 
-
-    if (QString(s) != LeiterkartenName)
-    {
-        if DEBUG1 syslog(LOG_ERR,"flashmemory read, contains wrong pcb name\n");
+    if (QString(s) != LeiterkartenName) {
+        syslog(LOG_ERR,"flashmemory read, contains wrong pcb name\n");
         return false; // leiterkarten name falsch
     }
 
     bastream >> s;
 
     QString qs = QString(s);
-    if (qs != sDeviceVersion)
-    {
+    if (qs != sDeviceVersion) {
         // test ob sich nur die hinteren nummern der lca bzw. ctrl version geändert haben
         // indem die hinteren stellen der nummern aus sDeviceVersion nach s übertragen werden
         // und anschliessend nochmal verglichen wird
@@ -611,18 +605,18 @@ bool cWM3000iServer::fetchJustData(QByteArray &jdata)
 
         if (qs != sDeviceVersion)
         {
-            if DEBUG1 syslog(LOG_ERR,"flashmemory read, contains wrong versionnumber\n");
+            syslog(LOG_ERR,"flashmemory read, contains wrong versionnumber\n");
             m_nJDataStat += wrongVERS;
             if (!EEPromAccessEnable()) return false; // versionsnummer falsch
         }
     }
 
     bastream >> s;
-    if (QString(s) != sSerialNumber)
-    {
-        if DEBUG1 syslog(LOG_ERR,"flashmemory read, contains wrong serialnumber\n");
+    if (QString(s) != sSerialNumber) {
+        syslog(LOG_ERR,"flashmemory read, contains wrong serialnumber\n");
         m_nJDataStat += wrongSNR;
-        if (!EEPromAccessEnable()) return false; // seriennummer falsch
+        if (!EEPromAccessEnable())
+            return false; // seriennummer falsch
     }
 
     bastream >> s;
@@ -1141,161 +1135,139 @@ const char* cWM3000iServer::mSetSampleFrequency(char* s) {
 
 const char* cWM3000iServer::mFile2Justdata(char* s)
 {
-    if ( !EEPromAccessEnable() )
-    {
+    if ( !EEPromAccessEnable() ) {
         Answer = ERRAUTString; // nicht erlaubt
         return Answer.latin1();
     }
-
     QString filename = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
     QFile file( filename+".xml" );
-    if ( !file.open( QIODevice::ReadOnly ) )
-    {
-        if DEBUG1 syslog(LOG_ERR,"justdata import,xml file does not exist\n");
+    if ( !file.open( QIODevice::ReadOnly ) ) {
+        syslog(LOG_ERR,"justdata import,xml file does not exist\n");
         Answer = ERRPATHString; // falscher filename
         return Answer.latin1();
     }
-    
+
     QDomDocument justdata( "TheDocument" );
-    if ( !justdata.setContent( &file ) )
-    {
+    if ( !justdata.setContent( &file ) ) {
         file.close();
-        if DEBUG1 syslog(LOG_ERR,"justdata import, format error in xml file\n");
+        syslog(LOG_ERR,"justdata import, format error in xml file\n");
         Answer = ERRXMLFORMATString; // fehler im xml file
         return Answer.latin1();
     }
     file.close();
 
-   QDomDocumentType TheDocType=justdata.doctype ();
-   if  (TheDocType.name() != "WM3000IAdjustmentData")
-   {
-        if DEBUG1 syslog(LOG_ERR,"justdata import, wrong xml documentype\n");
-     	Answer = ERRXMLDOCTYPEString; // document type inkorrekt
+    QDomDocumentType TheDocType=justdata.doctype ();
+    if (TheDocType.name() != "WM3000IAdjustmentData") {
+        syslog(LOG_ERR,"justdata import, wrong xml documentype\n");
+        Answer = ERRXMLDOCTYPEString; // document type inkorrekt
         return Answer.latin1();
-   }
-   
-   QDomElement rootElem = justdata.documentElement(); 
-   QDomNodeList nl=rootElem.childNodes();
-   
-   bool VersionNrOK=false;
-   bool SerialNrOK=false;
-   bool DateOK=false;
-   bool TimeOK=false;
-   
-   for (uint i=0; i<nl.length() ; i++)
-   {
-       QDomNode n = nl.item(i);
-       QDomElement e=n.toElement();
-       if ( e.isNull() )
-       {
-           Answer = ERRXMLFORMATString;
-           return Answer.latin1();
-       }
-       QString tName=e.tagName();
-       if (tName == "SerialNumber")
-       {
-           if (  !(SerialNrOK = (e.text() == sSerialNumber )) )
-           {
-               if DEBUG1 syslog(LOG_ERR,"justdata import, wrong serialnumber in xml file\n");
-               Answer = ERRXMLSERIALString;
-               return Answer.latin1();
-           }
-       }
-       else
-       if (tName == "VersionNumber")
-       {
-           if ( ! ( VersionNrOK= (e.text() == sDeviceVersion) ) )
-           {
-               if DEBUG1 syslog(LOG_ERR,"justdata import, wrong versionnumber in xml file\n");
-               Answer = ERRXMLVERSIONString;
-               return Answer.latin1();
-           }
-       }
-       else
-       if (tName=="Date")
-       {
+    }
+
+    QDomElement rootElem = justdata.documentElement();
+    QDomNodeList nl=rootElem.childNodes();
+
+    bool VersionNrOK=false;
+    bool SerialNrOK=false;
+    bool DateOK=false;
+    bool TimeOK=false;
+
+    for (uint i=0; i<nl.length() ; i++) {
+        QDomNode n = nl.item(i);
+        QDomElement e=n.toElement();
+        if ( e.isNull() ) {
+            Answer = ERRXMLFORMATString;
+            return Answer.latin1();
+        }
+        QString tName=e.tagName();
+        if (tName == "SerialNumber") {
+            if (  !(SerialNrOK = (e.text() == sSerialNumber )) ) {
+                syslog(LOG_ERR,"justdata import, wrong serialnumber in xml file\n");
+                Answer = ERRXMLSERIALString;
+                return Answer.latin1();
+            }
+        }
+        else if (tName == "VersionNumber") {
+            if ( ! ( VersionNrOK= (e.text() == sDeviceVersion) ) ) {
+                syslog(LOG_ERR,"justdata import, wrong versionnumber in xml file\n");
+                Answer = ERRXMLVERSIONString;
+                return Answer.latin1();
+            }
+        }
+        else if (tName=="Date") {
             QDate d=QDate::fromString(e.text(),Qt::TextDate);
             DateTime.setDate(d);
             DateOK=true;
-       }
-       else
-       if (tName=="Time")
-       {
+        }
+        else if (tName=="Time") {
             QTime t=QTime::fromString(e.text(),Qt::TextDate);
             DateTime.setTime(t);
             TimeOK=true;
-       }
-       else
-       if (tName == "Adjustment")
-       {
-           if ( VersionNrOK && SerialNrOK && DateOK && TimeOK)
-           {
-               QDomNodeList nl2=e.elementsByTagName ("Channel") ;
-               for (uint j=0;j<nl2.length();j++)
-               {
-                   n=nl2.item(j);
-                   if ( !GetAdjInfo(n) )
-                   {
-                       if DEBUG1 syslog(LOG_ERR,"justdata import, wrong channel in xml file\n");
-                       Answer = ERRXMLNODEString + n.nodeName();
-                       return Answer.latin1();
-                   }
+        }
+        else if (tName == "Adjustment") {
+            if ( VersionNrOK && SerialNrOK && DateOK && TimeOK) {
+                QDomNodeList nl2=e.elementsByTagName ("Channel") ;
+                for (uint j=0;j<nl2.length();j++) {
+                    n=nl2.item(j);
+                    if ( !GetAdjInfo(n) ) {
+                        syslog(LOG_ERR,"justdata import, wrong channel in xml file\n");
+                        Answer = ERRXMLNODEString + n.nodeName();
+                        return Answer.latin1();
+                    }
                }
                Answer = ACKString;
                return Answer.latin1();
            }
-       }
-   }
-
-   if DEBUG1 syslog(LOG_ERR,"justdata import, strange xml file\n");
-   Answer = ERRXMLFORMATString;
-   return Answer.latin1();
+        }
+    }
+    syslog(LOG_ERR,"justdata import, strange xml file\n");
+    Answer = ERRXMLFORMATString;
+    return Answer.latin1();
 }
 
 
-const char* cWM3000iServer::mJustData2File(char* s) {
+const char* cWM3000iServer::mJustData2File(char* s)
+{
     QDomDocument justdata( "WM3000IAdjustmentData" );
-    
+
     QDomElement pcbtag = justdata.createElement( "PCB" );
     justdata.appendChild( pcbtag );
-    
+
     QDomElement tag = justdata.createElement( "Type" );
     pcbtag.appendChild( tag );
     QDomText t = justdata.createTextNode( LeiterkartenName );
     tag.appendChild( t );
-        
+
     tag = justdata.createElement( "VersionNumber" );
     pcbtag.appendChild( tag );
     t = justdata.createTextNode( sDeviceVersion );
     tag.appendChild( t );
-   
+
     tag = justdata.createElement( "SerialNumber" );
     pcbtag.appendChild( tag );
     t = justdata.createTextNode( sSerialNumber );
     tag.appendChild( t );
-    
+
     tag = justdata.createElement( "Date" );
     pcbtag.appendChild( tag );
     QDate d=DateTime.date();
     t = justdata.createTextNode(d.toString(Qt::TextDate));
     tag.appendChild( t );
-		
+
     tag = justdata.createElement( "Time" );
     pcbtag.appendChild( tag );
     QTime ti=DateTime.time();
     t = justdata.createTextNode(ti.toString(Qt::TextDate));
     tag.appendChild( t );
-    
+
     QDomElement adjtag = justdata.createElement( "Adjustment" );
     pcbtag.appendChild( adjtag );
-    
+
     QDomElement chksumtag = justdata.createElement("Chksum");
     adjtag.appendChild(chksumtag);
     t = justdata.createTextNode(QString("0x%1").arg(m_nChksumFlash,0,16));
     chksumtag.appendChild(t);
-    
-    for (QStringList::iterator it=MeasChannelList.begin(); it !=MeasChannelList.end(); it++)
-    {
+
+    for (QStringList::iterator it=MeasChannelList.begin(); it !=MeasChannelList.end(); it++) {
         QDomElement chtag = justdata.createElement( "Channel" );
         adjtag.appendChild( chtag );
 
@@ -1317,8 +1289,7 @@ const char* cWM3000iServer::mJustData2File(char* s) {
             t = justdata.createTextNode(rng->RName);
             tag.appendChild( t );
 
-            if (jdvGreater("V2.07"))
-            {
+            if (jdvGreater("V2.07")) {
                 QDomElement gpotag = justdata.createElement( "Gain" );
                 rtag.appendChild(gpotag);
                 tag = justdata.createElement( "Status" );
@@ -1373,8 +1344,7 @@ const char* cWM3000iServer::mJustData2File(char* s) {
                 t = justdata.createTextNode(jdata);
                 tag.appendChild(t);
             }
-            else
-            {
+            else {
                 // wir müssen auch alte daten als xml speichern können
                 // wir wollen vielleicht im nachgang justagedaten dokumentieren
                 QStringList* sl=ChannelRangeListMap.find(*it).data();
@@ -1387,7 +1357,6 @@ const char* cWM3000iServer::mJustData2File(char* s) {
                     rtag.appendChild( tag );
                     t = justdata.createTextNode(rng->RName);
                     tag.appendChild( t );
-
 
                     tag = justdata.createElement( "Status" );
                     rtag.appendChild( tag );
@@ -1444,39 +1413,43 @@ const char* cWM3000iServer::mJustData2File(char* s) {
     
     QFile file(filename);
     if ( file.open( QIODevice::WriteOnly ) ) {
-	Q3TextStream stream( &file );
-	stream << xml;
-	file.close();
-	Answer = ACKString;
-	return Answer.latin1();
+        Q3TextStream stream( &file );
+        stream << xml;
+        file.close();
+        Answer = ACKString;
+        return Answer.latin1();
     }
-    if DEBUG1 syslog(LOG_ERR,"justdata export, could not open xml file\n");
+    syslog(LOG_ERR,"justdata export, could not open xml file\n");
     Answer = ERRPATHString;
     return Answer.latin1();
 }
- 
 
-const char* cWM3000iServer::mEEProm2JustData(char* s) {
-     if (pCmdInterpreter->m_pParser->GetChar(&s) ) { // schau mal nach ob noch was kommt
-	Answer = NACKString; // not acknowledge 	    
-	return Answer.latin1();
+
+const char* cWM3000iServer::mEEProm2JustData(char* s)
+{
+    if (pCmdInterpreter->m_pParser->GetChar(&s) ) { // schau mal nach ob noch was kommt
+        Answer = NACKString; // not acknowledge
+        return Answer.latin1();
     }
-    if (ReadJustData()) Answer = ACKString;
-    else Answer = ERRMMEMString;
+    if (ReadJustData())
+        Answer = ACKString;
+    else
+        Answer = ERRMMEMString;
     return Answer.latin1();
 }
  
 
-const char* cWM3000iServer::mJustData2EEProm(char* s) {
-     if (pCmdInterpreter->m_pParser->GetChar(&s) ) { // schau mal nach ob noch was kommt
-	Answer = NACKString; // not acknowledge 	    
-	return Answer.latin1();
+const char* cWM3000iServer::mJustData2EEProm(char* s)
+{
+    if (pCmdInterpreter->m_pParser->GetChar(&s) ) { // schau mal nach ob noch was kommt
+        Answer = NACKString; // not acknowledge
+        return Answer.latin1();
     }
-     if ( !EEPromAccessEnable() ){
-	 Answer = ERRAUTString; // nicht erlaubt
-	 return Answer.latin1();
+    if ( !EEPromAccessEnable() ) {
+        Answer = ERRAUTString; // nicht erlaubt
+        return Answer.latin1();
     }
-     
+
     uint count=0;
     Q_UINT16 chksum=0;
     QByteArray ba;
@@ -1485,7 +1458,7 @@ const char* cWM3000iServer::mJustData2EEProm(char* s) {
     
     stream << count;
     stream << chksum; // checksumme
-    
+
     // ab version v1.02
     stream << "ServerVersion";
     stream << ServerVersion;
@@ -1495,53 +1468,55 @@ const char* cWM3000iServer::mJustData2EEProm(char* s) {
     stream << sSerialNumber.latin1(); // seriennummer
     stream << DateTime.toString(Qt::TextDate).latin1(); // datum,uhrzeit
     for (QStringList::iterator it=MeasChannelList.begin(); it !=MeasChannelList.end(); it++) {
-	stream << (*it).latin1(); // kanalname
-	QStringList* sl=ChannelRangeListMap.find(*it).data(); 
-	count = sl->count();
-	stream << count;
-	QStringList::Iterator it3;
-	for ( it3 = sl->begin(); it3 != sl->end(); ++it3 ) { // für alle bereiche 
-	    sRange* rng = SearchRange(*it,*it3);
-	    stream << rng->RName; // bereich
-	    rng->pJustData->Serialize(stream); // justagedaten (koeffizienten, nodes und status)
-	}
-    }	
-    
+        stream << (*it).latin1(); // kanalname
+        QStringList* sl=ChannelRangeListMap.find(*it).data();
+        count = sl->count();
+        stream << count;
+        QStringList::Iterator it3;
+        for ( it3 = sl->begin(); it3 != sl->end(); ++it3 ) { // für alle bereiche
+            sRange* rng = SearchRange(*it,*it3);
+            stream << rng->RName; // bereich
+            rng->pJustData->Serialize(stream); // justagedaten (koeffizienten, nodes und status)
+        }
+    }
+
     count = ba.count(); // um die länge zu bestimmen
     QByteArray ca(6); // qbyte array mit 6 bytes
     
     QDataStream castream( &ca, QIODevice::WriteOnly );
     castream << count << chksum;
-	
+
     QBuffer mem(&ba);
     mem.open(QIODevice::ReadWrite);
     mem.at(0); // qbuffer auf den anfang positionieren
     mem.writeBlock(ca); // überschreibt die länge + checksumme (noch 0)
-	
+
     chksum = qChecksum(ba.data(),ba.size()); // +crc-16
     QDataStream castream2( &ca, QIODevice::WriteOnly );
     castream2 << count << chksum;
-	
+
     mem.at(0); 
     mem.writeBlock(ca); // überschreibt die länge und jetzt die richtige checksumme
-	
+
     // ein datenblock mit justagedaten für 1 kanal liegt in qbuffer mem 
-	
+
     mem.close(); // wird nicht mehr benötigt
    
-    c24LC256* Flash=new c24LC256(sI2CDevNode,DebugLevel,I2CEEPromAdress);
+    c24LC256* Flash = new c24LC256(sI2CDevNode,DebugLevel,I2CEEPromAdress);
     int written = Flash->WriteData(ba.data(),ba.size(),0);
     if ( (count - written) > 0) {
-	if DEBUG1 syslog(LOG_ERR,"error writing flashmemory\n");
-	Answer = ERRMMEMString; // fehler beim flash schreiben
+        syslog(LOG_ERR,"error writing flashmemory\n");
+        Answer = ERRMMEMString; // fehler beim flash schreiben
     }
-    
-    else
-    {
-	ReadJustData();
-	Answer = ACKString;
+
+    else {
+        usleep(6000);
+        if (ReadJustData())
+            Answer = ACKString;
+        else
+            Answer = ERRMMEMString; // geben aber eine fehlermeldung ab
     }
-    
+
     return Answer.latin1();
 }
 
@@ -2028,72 +2003,60 @@ const char* cWM3000iServer::mGetCValueCNodeName() {
 }
 
 
-bool cWM3000iServer::EEPromAccessEnable() { 
+bool cWM3000iServer::EEPromAccessEnable()
+{
     char PAR[1];
     struct hw_cmd CMD = { cmdcode: hwGetFlashWriteAccess, device: 0, par: PAR, plen: 0,cmdlen: 0,cmddata: 0, RM:0 };
     if ( (I2CWriteCommand(&CMD) == 2) && (CMD.RM == 0)) {
         quint8 answ[2];
-	return ( (I2CReadOutput(answ,2) == 2) && (answ[0]) );
+        return ( (I2CReadOutput(answ,2) == 2) && (answ[0]) );
     }
-                          return(false);
-                        }
+    return(false);
+}
 
 
 bool cWM3000iServer::isAtmelRunning()
 {
-        int fd;
-        if ( (fd = open(m_sFPGADeviceNode.latin1(),O_RDWR)) < 0 )
-        {
-            if (DEBUG1)  syslog(LOG_ERR,"error opening fpga device: %s\n",m_sFPGADeviceNode.latin1());
+    int fd;
+    if ( (fd = open(m_sFPGADeviceNode.latin1(),O_RDWR)) < 0 ) {
+        syslog(LOG_ERR,"error opening fpga device: %s\n",m_sFPGADeviceNode.latin1());
+        return false;
+    }
+    else {
+        ulong pcbTestReg;
+        int r;
+        if ( (r = lseek(fd,0xffc,0)) < 0 ) {
+            syslog(LOG_ERR,"error positioning fpga device: %s\n",m_sFPGADeviceNode.latin1());
+            close(fd);
             return false;
         }
-
-        else
-        {
-            ulong pcbTestReg;
-            int r;
-            if ( (r = lseek(fd,0xffc,0)) < 0 )
-            {
-                if  (DEBUG1)  syslog(LOG_ERR,"error positioning fpga device: %s\n",m_sFPGADeviceNode.latin1());
-                close(fd);
+        else {
+            r = read(fd,(char*) &pcbTestReg,4);
+            close(fd);
+            syslog(LOG_ERR,"reading fpga adr 0xffc =  %d\n", pcbTestReg);
+            if (r < 0 ) {
+                syslog(LOG_ERR,"error reading fpga device: %s\n",m_sFPGADeviceNode.latin1());
                 return false;
             }
             else
-            {
-                r = read(fd,(char*) &pcbTestReg,4);
-                close(fd);
-                if (DEBUG1)  syslog(LOG_ERR,"reading fpga adr 0xffc =  %d\n", pcbTestReg);
-                if (r < 0 )
-                {
-                    if (DEBUG1)  syslog(LOG_ERR,"error reading fpga device: %s\n",m_sFPGADeviceNode.latin1());
-                    return false;
-                }
-                else
-                    return ((pcbTestReg & 1) > 0);
-            }
+                return ((pcbTestReg & 1) > 0);
         }
+    }
 }
 
 
 bool cWM3000iServer::wait4AtmelRunning()
 {
-    int i;
     bool running;
-
-    for (i=0; i<100; i++)
-    {
+    for (int i=0; i<100; i++) {
         running = isAtmelRunning();
         if (running)
             break;
         usleep(100000);
     }
-
-    if (DEBUG1)
-        if (!running)
-            syslog(LOG_ERR,"atmel not running\n");
-
+    if (!running)
+        syslog(LOG_ERR,"atmel not running\n");
     return running;
-
 }
 
 
@@ -2124,7 +2087,7 @@ bool cWM3000iServer::programAtmelFlash()
         syslog(LOG_ERR,"reading fpga adr 0xffc =  %x\n", pcbTestReg);
         if (r < 0 )
         {
-            if (DEBUG1)  syslog(LOG_ERR,"error reading fpga device: %s\n",m_sFPGADeviceNode.latin1());
+            syslog(LOG_ERR,"error reading fpga device: %s\n",m_sFPGADeviceNode.latin1());
             syslog(LOG_ERR,"Programming atmel failed\n");
             return  false;
         }
@@ -2878,155 +2841,157 @@ const char* cWM3000iServer::mSetCalculateModel() {
 const char* cWM3000iServer::mOutChannelCatalog() {
     Answer="";
     QTextOStream* os=new QTextOStream(&Answer);
-    for (QStringList::iterator it = MeasChannelList.begin(); it != MeasChannelList.end(); ++it) *os << *it << ";";
+    for (QStringList::iterator it = MeasChannelList.begin(); it != MeasChannelList.end(); ++it)
+        *os << *it << ";";
     return Answer.latin1();
 }
 
-int cWM3000iServer::Execute() { // server ausführen
+int cWM3000iServer::Execute()
+{
     int sock;
     if ( (sock = socket( PF_INET, SOCK_STREAM, 0)) == -1) { //   socket holen
-	if DEBUG1 syslog(LOG_ERR,"socket() failed\n"); 
-	return(1);
+        syslog(LOG_ERR,"socket() failed\n");
+        return(1);
     }
     struct servent* se;
     if ( (se=getservbyname( sServerName.latin1(),"tcp")) == NULL ) {  // holt port nr aus /etc/services
-	if DEBUG1 syslog(LOG_ERR,"internet network services not found\n");
-	return(1);
+        syslog(LOG_ERR,"internet network services not found\n");
+        return(1);
     }
     struct sockaddr_in addr;
     addr.sin_addr.s_addr = INADDR_ANY; // alle adressen des host
     addr.sin_port = se->s_port; // ! s_port ist network byte order !
     addr.sin_family=AF_INET;
     if ( bind( sock, (struct sockaddr*) &addr, sizeof(addr)) == -1) { // ip-adresse und port an socket binden
-	if DEBUG1 syslog(LOG_ERR,"bind() failed\n");
-	return(1);
+        syslog(LOG_ERR,"bind() failed\n");
+        return(1);
     }
     if ( listen(sock,3) == -1) { // einrichten einer warteschlange für einlaufende verbindungsaufbauwünsche
-	if DEBUG1 syslog(LOG_ERR,"listen() faild\n");
-	return(1);
+        syslog(LOG_ERR,"listen() faild\n");
+        return(1);
     }
     char InputBuffer[InpBufSize];
     int nBytes;
     fd_set rfds,wfds; // menge von deskriptoren für read bzw. write
     int fd,fdmax,s;
     for (;;) {
-	FD_ZERO (&rfds);  // deskriptor menge löschen
-	FD_ZERO (&wfds);  
-	
-	fdmax=sock; // start socket
-	FD_SET(sock,&rfds); 
-	if ( ! clientlist.isEmpty()) for ( cZHClient* client=clientlist.first(); client; client=clientlist.next() ) {
-	    fd=client->sock;
-	    FD_SET(fd,&rfds); 
-	    if ( client->OutpAvail() ) 
-		FD_SET(fd,&wfds);  
-	    if (fd>fdmax) fdmax=fd;
-	}
-	select(fdmax+1,&rfds,&wfds,NULL,NULL); // warte auf daten, oder das daten gesendet werden können
-	
-	if ( FD_ISSET(sock,&rfds) ) { // hier ggf. client hinzunehmen
-	    int addrlen=sizeof(addr);
-	    if ( (s=accept(sock,(struct sockaddr*) &addr, (socklen_t*) &addrlen) ) == -1 ) {
-		if DEBUG1 syslog(LOG_ERR,"accept() failed\n");
-	    }
-	    else {
-		AddClient(s,(struct sockaddr_in*) &addr);
-	    }
-	}
-		
-	if ( ! clientlist.isEmpty()) for ( cZHClient* client=clientlist.first(); client; client=clientlist.next() ) {
-	    fd=client->sock;
-	    if (FD_ISSET(fd,&rfds) ) { // sind daten für den client da, oder hat er sich abgemeldet ?
-		if ( (nBytes=recv(fd,InputBuffer,InpBufSize,0)) > 0  ) { // daten sind da
-		    bool InpRdy=false;
-		    switch (InputBuffer[nBytes-1]) { // letztes zeichen
-			    case 0x0d: // cr
-				InputBuffer[--nBytes]=0; // c string ende daraus machen 
-				InpRdy=true;
-				break;
-			    case 0x0a: // linefeed
-				InputBuffer[--nBytes]=0; 
-				if (nBytes) 
-				    if (InputBuffer[nBytes-1] == 0x0d) InputBuffer[--nBytes]=0;
-				InpRdy=true;
-				break;
-                case 0x04: // eof
-				InputBuffer[nBytes-1]=0; // c string ende daraus machen 
-				InpRdy=true;
-				break;
-			    case 0:
-				InpRdy=true; // daten komplett und 0 terminiert
-				break;
-			    default:
-				InputBuffer[nBytes]=0; // teil string komplettieren
-		    }
-		    
-		    client->AddInput(&InputBuffer[0]);
-		     if (InpRdy) {
-			ActSock=fd; 
-		              client->SetOutput(pCmdInterpreter->CmdExecute(client->GetInput())); // führt kommando aus und setzt
-			client->ClearInput();
-		     }
-		}
-		else 
-		{
-		    DelClient(fd); // client hat sich abgemeldet ( hab den iterator zwar, aber DelClient ist virtuell !!! ) 
-		    close(fd);
-		}
-	    }
-	}
-	
-	if ( ! clientlist.isEmpty()) for ( cZHClient* client=clientlist.first(); client; client=clientlist.next() ) {
-	    fd=client->sock;
-	    if (FD_ISSET(fd,&wfds) ) { // soll und kann was an den client gesendet werden ?
-		QString out = client->GetOutput();
-		out+="\n";
-		// char* out=client->GetOutput();
-		send(fd,out.latin1(),out.length(),0);
-		client->SetOutput(""); // kein output mehr da .
-	    } 
-	}
+        FD_ZERO (&rfds);  // deskriptor menge löschen
+        FD_ZERO (&wfds);
+
+        fdmax=sock; // start socket
+        FD_SET(sock,&rfds);
+        if ( !clientlist.isEmpty())
+            for ( cZHClient* client=clientlist.first(); client; client=clientlist.next() ) {
+                fd=client->sock;
+                FD_SET(fd,&rfds);
+                if ( client->OutpAvail() )
+                    FD_SET(fd,&wfds);
+                if (fd>fdmax)
+                    fdmax=fd;
+            }
+        select(fdmax+1,&rfds,&wfds,NULL,NULL); // warte auf daten, oder das daten gesendet werden können
+
+        if ( FD_ISSET(sock,&rfds) ) { // hier ggf. client hinzunehmen
+            int addrlen=sizeof(addr);
+            if ( (s=accept(sock,(struct sockaddr*) &addr, (socklen_t*) &addrlen) ) == -1 )
+                syslog(LOG_ERR,"accept() failed\n");
+            else
+                AddClient(s,(struct sockaddr_in*) &addr);
+        }
+
+        if ( ! clientlist.isEmpty()) for ( cZHClient* client=clientlist.first(); client; client=clientlist.next() ) {
+            fd=client->sock;
+            if (FD_ISSET(fd,&rfds) ) { // sind daten für den client da, oder hat er sich abgemeldet ?
+                if ( (nBytes=recv(fd,InputBuffer,InpBufSize,0)) > 0  ) { // daten sind da
+                    bool InpRdy=false;
+                    switch (InputBuffer[nBytes-1]) { // letztes zeichen
+                    case 0x0d: // cr
+                        InputBuffer[--nBytes]=0; // c string ende daraus machen
+                        InpRdy=true;
+                        break;
+                    case 0x0a: // linefeed
+                        InputBuffer[--nBytes]=0;
+                        if (nBytes)
+                            if (InputBuffer[nBytes-1] == 0x0d)
+                                InputBuffer[--nBytes]=0;
+                        InpRdy=true;
+                        break;
+                    case 0x04: // eof
+                        InputBuffer[nBytes-1]=0; // c string ende daraus machen
+                        InpRdy=true;
+                        break;
+                    case 0:
+                        InpRdy=true; // daten komplett und 0 terminiert
+                        break;
+                    default:
+                        InputBuffer[nBytes]=0; // teil string komplettieren
+                    }
+
+                    client->AddInput(&InputBuffer[0]);
+                    if (InpRdy) {
+                        ActSock=fd;
+                        client->SetOutput(pCmdInterpreter->CmdExecute(client->GetInput())); // führt kommando aus und setzt
+                        client->ClearInput();
+                    }
+                }
+                else {
+                    DelClient(fd); // client hat sich abgemeldet ( hab den iterator zwar, aber DelClient ist virtuell !!! )
+                    close(fd);
+                }
+            }
+        }
+
+        if ( ! clientlist.isEmpty())
+            for ( cZHClient* client=clientlist.first(); client; client=clientlist.next() ) {
+                fd=client->sock;
+                if (FD_ISSET(fd,&wfds) ) { // soll und kann was an den client gesendet werden ?
+                    QString out = client->GetOutput();
+                    out+="\n";
+                    send(fd,out.latin1(),out.length(),0);
+                    client->SetOutput(""); // kein output mehr da .
+                }
+            }
     }
     close(sock);
 }
 
-void cWM3000iServer::AddClient(int s, sockaddr_in* addr) { // fügt einen client hinzu
+void cWM3000iServer::AddClient(int s, sockaddr_in* addr)
+{
     clientlist.append(new cZHClient(s,addr));
     if DEBUG3 syslog(LOG_INFO,"client %d added\n",s);
 }
 
 
 const char* cWM3000iServer::SCPICmd( SCPICmdType cmd, char* s) {
-    switch ((int)cmd)	{
-	
-    case   SetPSamples:		return mSetPSamples(s);	
-    case    SetSenseAbsDiff: return mSetSenseAbsDiff(s);
-    case 	SetSampleMode:		return mSetSampleMode(s);
-    case   SetSampleFrequency:	return mSetSampleFrequency(s);
-    case 	SetSerialNumber: 		return mSetSerialNumber(s);
-    case	ControlerStartProgram:	return mControlerStartProgram(s);
-    case 	ControlerStartBootloader:	return mControlerStartBootloader(s);
-    case	ControlerFlashUpdate:	return mControlerFlashUpdate(s);
-    case 	ControlerEEpromUpdate:	return mControlerEEpromUpdate(s);
-    case  	File2Justdata:		return mFile2Justdata(s);	     	     
-    case   JustData2File:		return mJustData2File(s);	     	     
-    case 	EEProm2JustData:	return mEEProm2JustData(s);	     	     
-    case 	JustData2EEProm:	return mJustData2EEProm(s);	     
-    case 	SetDebugLevel:		return mSetDebugLevel(s);
-    case 	SetCValueCCoefficient:	return mSetCValueCCoefficient(s);
-    case 	SetCValueCNode:		return mSetCValueCNode(s);
-    case	CmpCCoefficient:		return mCmpCCoefficient(s);
-    case   SetGStatus:		return mSetGainStatus(s);
-    case   SetPStatus:		return mSetPhaseStatus(s);
-    case   SetOStatus:		return mSetOffsetStatus(s);
-    case   SetRange:		return mSetRange(s);
-    case   ChannelClose:		return mChannelClose(s);
-    case 	ChannelOpen:		return mChannelOpen(s);
-    case   SetSyncSource:		return mSetSyncSource(s);
-    case	SetSyncPeriod:		return mSetSyncPeriod(s);	
-    case   SetPCBVersion:		return mSetPCBVersion(s);
-    case   ResetStatOVL:		return mResetStatOVL(s);	
-    case 	SetProtection:		return mSetProtection(s);	
+    switch ((int)cmd) {
+    case SetPSamples:               return mSetPSamples(s);
+    case SetSenseAbsDiff:           return mSetSenseAbsDiff(s);
+    case SetSampleMode:             return mSetSampleMode(s);
+    case SetSampleFrequency:        return mSetSampleFrequency(s);
+    case SetSerialNumber:           return mSetSerialNumber(s);
+    case ControlerStartProgram:     return mControlerStartProgram(s);
+    case ControlerStartBootloader:  return mControlerStartBootloader(s);
+    case ControlerFlashUpdate:      return mControlerFlashUpdate(s);
+    case ControlerEEpromUpdate:     return mControlerEEpromUpdate(s);
+    case File2Justdata:             return mFile2Justdata(s);
+    case JustData2File:             return mJustData2File(s);
+    case EEProm2JustData:           return mEEProm2JustData(s);
+    case JustData2EEProm:           return mJustData2EEProm(s);
+    case SetDebugLevel:             return mSetDebugLevel(s);
+    case SetCValueCCoefficient:     return mSetCValueCCoefficient(s);
+    case SetCValueCNode:            return mSetCValueCNode(s);
+    case CmpCCoefficient:           return mCmpCCoefficient(s);
+    case SetGStatus:                return mSetGainStatus(s);
+    case SetPStatus:                return mSetPhaseStatus(s);
+    case SetOStatus:                return mSetOffsetStatus(s);
+    case SetRange:                  return mSetRange(s);
+    case ChannelClose:              return mChannelClose(s);
+    case ChannelOpen:               return mChannelOpen(s);
+    case SetSyncSource:             return mSetSyncSource(s);
+    case SetSyncPeriod:             return mSetSyncPeriod(s);
+    case SetPCBVersion:             return mSetPCBVersion(s);
+    case ResetStatOVL:              return mResetStatOVL(s);
+    case SetProtection:             return mSetProtection(s);
     }
     Answer = "ProgrammierFehler"; // hier sollten wir nie hinkommen
     return Answer.latin1();
@@ -3034,45 +2999,44 @@ const char* cWM3000iServer::SCPICmd( SCPICmdType cmd, char* s) {
  
 
 const char* cWM3000iServer::SCPIQuery( SCPICmdType cmd, char* s) {
-    switch ((int)cmd)	{
-	
-    case		GetPSamples:		return mGetPSamples();	
-    case 		GetSampleMode:		return mGetSampleMode();
-    case 		GetSampleFrequency:	return mGetSampleFrequency();
-    case 	 	GetSerialNumber: 		return mGetSerialNumber();
-    case 		GetI2CMasterAdress:	return mGetI2CMasterAdress();
-    case 		GetI2CSlaveAdress:	return mGetI2CSlaveAdress();		 
-    case 		GetI2CDeviceNode:	return mGetI2CDeviceNode();
-    case 		GetDebugLevel:		return mGetDebugLevel();
-    case 		GetDeviceVersion:		return mGetDeviceVersion();
-    case 		GetServerVersion:		return mGetServerVersion();  
-    case 		GetAdjustmentStatus:	return mGetAdjustmentStatus();
-    case 		GetDeviceStatus:		return mGetDeviceStatus();	     
-    case 		OutCValueCatalog:		return mOutCValueCatalog();
-    case 		SetCalculateModel:	return mSetCalculateModel();
-    case 		GetCValueCCoefficient:	return mGetCValueCCoefficient();
-    case 		GetCValueCCoefficientName: return mGetCValueCCoefficientName();
-    case 		GetCValueCNode:		return mGetCValueCNode();	
-    case 		GetCValueCNodeName:	return mGetCValueCNodeName();	
-    case        GetStatus:      return mGetStatus();
-    case 		GetGStatus:		return mGetGainStatus();
-    case 		GetPStatus:		return mGetPhaseStatus();
-    case 		GetOStatus:		return mGetOffsetStatus();
-    case 		GetCValue:		return mGetCValue(s);
-    case 		GetRejection:		return mGetRejection();
-    case 		GetRValue:		return mGetRValue();
-    case 		OutRangeCatalog:		return mOutRangeCatalog();
-    case 		GetRange:		return mGetRange();
-    case 		OutChannelCatalog:	return mOutChannelCatalog();
-    case 		GetSyncSource:		return mGetSyncSource();
-    case		GetSyncPeriod:		return mGetSyncPeriod();	
-    case 		GetPCBVersion:		return mGetPCBVersion();
-    case 		GetCTRLVersion:		return mGetCTRLVersion();
-    case 		GetLCAVersion:		return mGetLCAVersion();	
-    case 		GetEEPromEnable:	return mGetEEpromEnable();
-    case 		GetEEPromChksum:	return mGetEEPrChksum();
-    case 		GetStatOVL: 		return mGetStatOVL();
-    case 		GetProtection:		return mGetProtection();
+    switch ((int)cmd) {
+    case GetPSamples:               return mGetPSamples();
+    case GetSampleMode:             return mGetSampleMode();
+    case GetSampleFrequency:        return mGetSampleFrequency();
+    case GetSerialNumber:           return mGetSerialNumber();
+    case GetI2CMasterAdress:        return mGetI2CMasterAdress();
+    case GetI2CSlaveAdress:         return mGetI2CSlaveAdress();
+    case GetI2CDeviceNode:          return mGetI2CDeviceNode();
+    case GetDebugLevel:             return mGetDebugLevel();
+    case GetDeviceVersion:          return mGetDeviceVersion();
+    case GetServerVersion:          return mGetServerVersion();
+    case GetAdjustmentStatus:       return mGetAdjustmentStatus();
+    case GetDeviceStatus:           return mGetDeviceStatus();
+    case OutCValueCatalog:          return mOutCValueCatalog();
+    case SetCalculateModel:         return mSetCalculateModel();
+    case GetCValueCCoefficient:     return mGetCValueCCoefficient();
+    case GetCValueCCoefficientName: return mGetCValueCCoefficientName();
+    case GetCValueCNode:            return mGetCValueCNode();
+    case GetCValueCNodeName:        return mGetCValueCNodeName();
+    case GetStatus:                 return mGetStatus();
+    case GetGStatus:                return mGetGainStatus();
+    case GetPStatus:                return mGetPhaseStatus();
+    case GetOStatus:                return mGetOffsetStatus();
+    case GetCValue:                 return mGetCValue(s);
+    case GetRejection:              return mGetRejection();
+    case GetRValue:                 return mGetRValue();
+    case OutRangeCatalog:           return mOutRangeCatalog();
+    case GetRange:                  return mGetRange();
+    case OutChannelCatalog:         return mOutChannelCatalog();
+    case GetSyncSource:             return mGetSyncSource();
+    case GetSyncPeriod:             return mGetSyncPeriod();
+    case GetPCBVersion:             return mGetPCBVersion();
+    case GetCTRLVersion:            return mGetCTRLVersion();
+    case GetLCAVersion:             return mGetLCAVersion();
+    case GetEEPromEnable:           return mGetEEpromEnable();
+    case GetEEPromChksum:           return mGetEEPrChksum();
+    case GetStatOVL:                return mGetStatOVL();
+    case GetProtection:             return mGetProtection();
     }
     Answer = "ProgrammierFehler"; // hier sollten wir nie hinkommen
     return Answer.latin1();
