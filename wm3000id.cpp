@@ -825,7 +825,7 @@ void cWM3000iServer::setDefaultADCJustData()
     li25660 << 1.000198 << 50.0 << 1.000435 << 60.0 << 1.001013 << 80.0;
     corrNodeHash["ADW256.60"] = li25660;
 
-    if (jdvGreater("V2.15"))
+    if (jdvGreater("V2.09"))
     {
         QList<double> li9650;
         li9650 << 0.999801 << 40.0 << 0.999891 << 50.0 << 1.0 << 60.0;
